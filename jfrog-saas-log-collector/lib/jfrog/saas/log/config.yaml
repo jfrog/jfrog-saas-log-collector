@@ -4,15 +4,17 @@ connection:
   username: "vasukin"
   access_token: "eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJVcjJXUDA0b3NjR2hEVnp5ejF4cTIxSlVpOVV3R05wbUdRWi1HN3NwUHo0In0.eyJleHQiOiJ7XCJyZXZvY2FibGVcIjpcInRydWVcIn0iLCJzdWIiOiJqZmFjQDAxZTNzeW1idGJiMjc4MXZlcTBnOWsxeXFmXC91c2Vyc1wvdmFzdWtpbiIsInNjcCI6ImFwcGxpZWQtcGVybWlzc2lvbnNcL2FkbWluIiwiYXVkIjoiKkAqIiwiaXNzIjoiamZmZUAwMDAiLCJleHAiOjE2NzgzNDQ3NTQsImlhdCI6MTY0NjgwODc1NCwianRpIjoiMDg1ODgyODMtZDEyMC00Y2YwLTg4NDctZjM1ZWYxYzdhNTRjIn0.bNjFjgYyRuBwhRPX-COI3iU5PRfckoS9EWOgPZCf7AxrPkNC-dUpSXzOuEtxEMAdrCrXltE6k23hqoxXVn4XyL3aRcUa8dzNI1sJfDIQhdGYs39--YYRE-Jwk7t8UR17CCIM9xjqGXYWsCUsBJojBVlntWM0Js3T_t8nZz4Lu_RPg0CDDaVmD1QNj-A83-bHJByuItIDQ5HazNrtpLLuzrojq0F8L5ZmyNhClCcj8L5GXJnUSI5Tu-ElafCvtk2f7s952Wwzbh9FGBU6AFQEUpqAbZq0ZZsklgSS8f6HqzMf2tyoM_CqPc8NgZs62ngVzU9iYx60wf8j4oJTs7pxYw"
   api_key: ""
+  open_timeout_in_secs: 2
+  read_timeout_in_secs: 2
 log:
   solutions_enabled: "artifactory, xray"
-  log_types_enabled: "access"
+  log_types_enabled: "access-request, router-request"
   uri_date_pattern: "%Y-%m-%d"
   audit_repo: "artifactory/jfrog-logs-audit"
   log_repo: "artifactory/jfrog-logs"
   debug_mode: false
 process:
-  target_jfrt_path: "/var/opt/jfrog/artifactory"
-  target_jfxr_path: "/var/opt/jfrog/xray"
+  target_jfrt_path: "/Volumes/data/jfrogplatform/artifactory/var/log/saas"
+  target_jfxr_path: "/Volumes/data/jfrogplatform/xray/var/log/saas"
   parallel_downloads: 10
 

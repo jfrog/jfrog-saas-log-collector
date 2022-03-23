@@ -11,6 +11,12 @@ gem "minitest", "~> 5.0"
 
 gem "rubocop", "~> 1.21"
 
-gem "rest-client", "~> 2.1.0"
-
 gem "faraday", "~> 2.2.0"
+
+gem "faraday-follow_redirects"
+
+gem "faraday-gzip"
+
+gem "faraday-retry"
+
+gem "zlib"
