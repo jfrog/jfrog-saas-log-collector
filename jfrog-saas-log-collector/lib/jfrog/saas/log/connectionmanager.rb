@@ -27,7 +27,7 @@ module Jfrog
                                        interval: 0.05,
                                        interval_randomness: 0.5,
                                        backoff_factor: 2,
-                                       exceptions: [Errno::ETIMEDOUT, 'Timeout::Error', Faraday::TimeoutError, Faraday::RetriableResponse])
+                                       exceptions: [Errno::ETIMEDOUT, "Timeout::Error", Faraday::TimeoutError, Faraday::RetriableResponse])
             connection.request :gzip if gzip_support == true
           end
         end
