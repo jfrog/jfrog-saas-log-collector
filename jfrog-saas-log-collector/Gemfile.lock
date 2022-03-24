@@ -51,6 +51,7 @@ DEPENDENCIES
   faraday-retry
   jfrog-saas-log-collector!
   minitest (~> 5.0)
+  parallel
   rake (~> 13.0)
   rubocop (~> 1.21)
   zlib

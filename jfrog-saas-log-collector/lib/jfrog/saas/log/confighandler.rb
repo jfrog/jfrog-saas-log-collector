@@ -81,6 +81,7 @@ module Jfrog
         uri_date_pattern = ""
         audit_repo_url = ""
         log_repo_url = ""
+        target_log_path = ""
         debug_mode = false
 
         def self.solutions_enabled
@@ -107,7 +108,11 @@ module Jfrog
           debug_mode
         end
 
-        attr_accessor :solutions_enabled, :log_types_enabled, :uri_date_pattern, :audit_repo_url, :log_repo_url, :debug_mode
+        def self.target_log_path
+          target_log_path
+        end
+
+        attr_accessor :solutions_enabled, :log_types_enabled, :uri_date_pattern, :audit_repo_url, :log_repo_url, :debug_mode, :target_log_path
 
         def initialize; end
 
@@ -118,6 +123,7 @@ module Jfrog
           self.uri_date_pattern = (config["log"]["uri_date_pattern"]).to_s
           self.audit_repo_url = (config["log"]["audit_repo"]).to_s
           self.log_repo_url = (config["log"]["log_repo"]).to_s
+          self.target_log_path = (config["log"]["target_log_path"]).to_s
           self.debug_mode = (config["log"]["debug_mode"])
         end
 
@@ -129,30 +135,18 @@ module Jfrog
 
       class ProcessConfig
         include Singleton
-        target_jfrt_path = ""
-        target_jfxr_path = ""
-        parallel_downloads = 10
-
-        def self.target_jfrt_path
-          target_jfrt_path
-        end
-
-        def self.target_jfxr_path
-          target_jfxr_path
-        end
+        parallel_downloads = 1
 
         def self.parallel_downloads
           parallel_downloads
         end
 
-        attr_accessor :target_jfrt_path, :target_jfxr_path, :parallel_downloads
+        attr_accessor :parallel_downloads
 
         def initialize; end
 
         def configure(config_file, suffix)
           config = YAML.load_file(config_file)
-          self.target_jfrt_path = (config["process"]["target_jfrt_path"]).to_s
-          self.target_jfxr_path = (config["process"]["target_jfxr_path"]).to_s
           self.parallel_downloads = config["process"]["parallel_downloads"]
         end
 
@@ -195,14 +189,14 @@ module Jfrog
           # If not found in options, check for the environment variable
           @config_path = ENV["LOG_COLLECTOR_CONFIG"] if @config_path.nil?
           # If not found in environment variable, look for current path
-          @config_path = "config.yaml" if @config_path.nil?
+          @config_path = "config_local.yaml" if @config_path.nil?
           load_all_config(@config_path, "initialize")
         end
 
         def load_all_config(config_file, thread_name)
           @mutex.synchronize do
             if !config_file.nil?
-              CommonUtils.instance.print_msg("#{thread_name} - Config Start")
+              CommonUtils.instance.print_msg(nil, "#{thread_name} - Config Start")
               @conn_config = ConnectionConfig.instance
               @conn_config.configure(config_file, thread_name)
               @log_config = LogConfig.instance
@@ -211,17 +205,17 @@ module Jfrog
               @proc_config.configure(config_file, thread_name)
 
               if LogConfig.instance.debug_mode == true
-                CommonUtils.instance.print_msg("#{thread_name} - Connection Configuration : #{@conn_config}")
+                CommonUtils.instance.print_msg(nil, "#{thread_name} - Connection Configuration : #{@conn_config}")
               end
               if LogConfig.instance.debug_mode == true
-                CommonUtils.instance.print_msg("#{thread_name} - Logging Configuration : #{@log_config}")
+                CommonUtils.instance.print_msg(nil, "#{thread_name} - Logging Configuration : #{@log_config}")
               end
               if LogConfig.instance.debug_mode == true
-                CommonUtils.instance.print_msg("#{thread_name} - Processor Configuration : #{@proc_config}")
+                CommonUtils.instance.print_msg(nil, "#{thread_name} - Processor Configuration : #{@proc_config}")
               end
-              CommonUtils.instance.print_msg("#{thread_name} - Config End")
+              CommonUtils.instance.print_msg(nil, "#{thread_name} - Config End")
             else
-              CommonUtils.instance.print_msg("No Config file provided")
+              CommonUtils.instance.print_msg(nil, "No Config file provided")
             end
           end
         end

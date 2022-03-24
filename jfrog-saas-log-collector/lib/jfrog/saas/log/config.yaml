@@ -13,8 +13,7 @@ log:
   audit_repo: "artifactory/jfrog-logs-audit"
   log_repo: "artifactory/jfrog-logs"
   debug_mode: false
+  target_log_path: "<path_to_extract_logs_for_artifactory>"
 process:
-  target_jfrt_path: "<path_to_extract_logs_for_artifactory>"
-  target_jfxr_path: "<path_to_extract_logs_for_xray>"
   parallel_downloads: 10
 

@@ -23,7 +23,7 @@ module Jfrog
             connection.use Faraday::Response::Logger if ConfigHandler.instance.log_config.debug_mode == true
             connection.options.open_timeout = ConfigHandler.instance.conn_config.open_timeout_in_secs
             connection.options.read_timeout = ConfigHandler.instance.conn_config.read_timeout_in_secs
-            connection.request(:retry, max: 2,
+            connection.request(:retry, max: 3,
                                        interval: 0.05,
                                        interval_randomness: 0.5,
                                        backoff_factor: 2,

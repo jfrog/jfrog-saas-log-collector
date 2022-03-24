@@ -20,3 +20,5 @@ gem "faraday-gzip"
 gem "faraday-retry"
 
 gem "zlib"
+
+gem "parallel"
