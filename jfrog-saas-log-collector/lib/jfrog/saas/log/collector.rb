@@ -26,9 +26,17 @@ module Jfrog
             file_map&.each do |file_name, file_details|
               url = "#{ConfigHandler.instance.conn_config.end_point_base}/#{file_details["repo"]}/#{file_details["path"]}/#{file_details["name"]}"
               date_detail = date.split(CommonUtils::DELIM)
-              CommonUtils.instance.print_msg(solution, "Executing log download for #{date_detail[0]} solution logs for date #{date_detail[1]}")
-              CommonUtils.instance.print_msg(solution, "Downloading log #{url} of size #{CommonUtils.instance.get_size_in_mb(file_details["size"].to_i, true)}")
-              CommonUtils.instance.download_and_extract_log(solution, ConfigHandler.instance.log_config.target_log_path, file_name, url, nil)
+              mapped_solution = date_detail[0]
+              mapped_date = date_detail[1]
+              target_audit_repo_dir = "#{mapped_solution}/#{mapped_date}"
+              target_audit_repo_exists = CommonUtils.instance.check_and_create_audit_repo_tgt_dir(solution, target_audit_repo_dir)
+              if target_audit_repo_exists
+                CommonUtils.instance.print_msg(solution, "Executing log download for #{mapped_solution} solution logs for date #{mapped_date}")
+                CommonUtils.instance.print_msg(solution, "Downloading log #{url} of size #{CommonUtils.instance.get_size_in_mb(file_details["size"].to_i, true)}")
+                CommonUtils.instance.download_and_extract_log(solution, mapped_date, ConfigHandler.instance.log_config.target_log_path, file_name, url)
+              else
+                CommonUtils.instance.print_msg(solution, "Audit File creation for #{audit_repo_target_dir_url("#{mapped_solution}/#{mapped_date}", false, true, false)}/#{file_name} failed")
+              end
             end
           end
         end
@@ -38,15 +46,17 @@ module Jfrog
       module Collector
         cfg = ConfigHandler.instance
         log_shipping_enabled = CommonUtils.instance.log_shipping_enabled
-        log_repo_found = CommonUtils.instance.check_if_resource_exists(CommonUtils.instance.log_repo_url)
+        log_repo_found = CommonUtils.instance.check_if_resource_exists(nil, CommonUtils.instance.log_repo_url)
         audit_repo_found = CommonUtils.instance.check_and_create_audit_repo
 
         if log_shipping_enabled && log_repo_found && audit_repo_found
+          start_date_str = (Date.today - cfg.proc_config.historical_log_days).to_s
+          end_date_str = Date.today.to_s
           CommonUtils.instance.print_msg(nil, "Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url} and audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} found, proceeding with jfrog-saas-log-collector operation")
           Parallel.map(cfg.log_config.solutions_enabled, in_processes: cfg.proc_config.parallel_downloads) do |solution|
             proc = Processor.new
-            logs = proc.process_logs(solution, (Date.today - cfg.proc_config.historical_log_days).to_s, Date.today.to_s)
-            proc.download_and_extract_logs(solution, logs)
+            logs_to_process = proc.process_logs(solution, start_date_str, end_date_str)
+            proc.download_and_extract_logs(solution, logs_to_process)
           end
         elsif !log_shipping_enabled
           CommonUtils.instance.print_msg(nil, "Log collection is not enabled for #{ConfigHandler.instance.conn_config.jpd_url}, please contact JFrog Support to enable log collection, terminating jfrog-saas-log-collector operation")

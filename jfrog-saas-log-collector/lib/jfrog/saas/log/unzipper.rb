@@ -17,7 +17,7 @@ module Jfrog
             File.open("#{sol_tgt_path}/#{target_file_name}", "a") do |fp|
               fp.write(Zlib::GzipReader.new(StringIO.new(gzip_content)).read)
             end
-            CommonUtils.instance.print_msg(solution, "Extracted log #{source_file} successfully appended the content to #{sol_tgt_path}/#{target_file_name}")
+            CommonUtils.instance.print_msg(solution, "Extracted log #{source_file} successfully written the content to #{sol_tgt_path}/#{target_file_name}")
           end
         end
       end

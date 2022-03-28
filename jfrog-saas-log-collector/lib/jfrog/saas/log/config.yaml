@@ -18,5 +18,6 @@ log:
 process:
   parallel_downloads: 10
   historical_log_days: 0
+  write_logs_by_type: false
 
 

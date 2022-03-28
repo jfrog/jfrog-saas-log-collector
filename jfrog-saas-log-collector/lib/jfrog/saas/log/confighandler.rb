@@ -143,6 +143,7 @@ module Jfrog
         include Singleton
         parallel_downloads = 1
         historical_log_days = 1
+        write_logs_by_type = false
 
         def self.parallel_downloads
           parallel_downloads
@@ -152,7 +153,11 @@ module Jfrog
           historical_log_days
         end
 
-        attr_accessor :parallel_downloads, :historical_log_days
+        def self.write_logs_by_type
+          write_logs_by_type
+        end
+
+        attr_accessor :parallel_downloads, :historical_log_days, :write_logs_by_type
 
         def initialize; end
 
@@ -160,10 +165,11 @@ module Jfrog
           config = YAML.load_file(config_file)
           self.parallel_downloads = config["process"]["parallel_downloads"].to_i
           self.historical_log_days = config["process"]["historical_log_days"].to_i
+          self.write_logs_by_type = config["process"]["write_logs_by_type"]
         end
 
         def to_s
-          "Object_id :#{object_id}, parallel_downloads: #{parallel_downloads}, historical_log_days: #{historical_log_days}"
+          "Object_id :#{object_id}, parallel_downloads: #{parallel_downloads}, historical_log_days: #{historical_log_days}, write_logs_by_type: #{write_logs_by_type}"
         end
 
       end
