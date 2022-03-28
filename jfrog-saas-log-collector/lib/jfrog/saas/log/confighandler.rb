@@ -59,11 +59,11 @@ module Jfrog
 
         def configure(config_file, suffix)
           config = YAML.load_file(config_file)
-          self.jpd_url = (config["connection"]["jpd_url"]).to_s
-          self.username = (config["connection"]["username"]).to_s
-          self.access_token = (config["connection"]["access_token"]).to_s
-          self.end_point_base = (config["connection"]["end_point_base"]).to_s
-          self.api_key = (config["connection"]["api_key"]).to_s
+          self.jpd_url = (config["connection"]["jpd_url"]).to_s.strip
+          self.username = (config["connection"]["username"]).to_s.strip
+          self.access_token = (config["connection"]["access_token"]).to_s.strip # TODO: Check if the Strip is needed for access token, can spaces be at start and end of any token
+          self.end_point_base = (config["connection"]["end_point_base"]).to_s.strip
+          self.api_key = (config["connection"]["api_key"]).to_s.strip
           self.ignore_errors_in_response = (config["connection"]["ignore_errors_in_response"])
           self.open_timeout_in_secs = (config["connection"]["open_timeout_in_secs"])
           self.read_timeout_in_secs = (config["connection"]["read_timeout_in_secs"])
@@ -76,6 +76,7 @@ module Jfrog
 
       class LogConfig
         include Singleton
+        log_ship_config = ""
         solutions_enabled = []
         log_types_enabled = []
         uri_date_pattern = ""
@@ -83,6 +84,10 @@ module Jfrog
         log_repo_url = ""
         target_log_path = ""
         debug_mode = false
+
+        def self.log_ship_config
+          log_ship_config
+        end
 
         def self.solutions_enabled
           solutions_enabled
@@ -112,18 +117,19 @@ module Jfrog
           target_log_path
         end
 
-        attr_accessor :solutions_enabled, :log_types_enabled, :uri_date_pattern, :audit_repo_url, :log_repo_url, :debug_mode, :target_log_path
+        attr_accessor :solutions_enabled, :log_types_enabled, :uri_date_pattern, :audit_repo_url, :log_repo_url, :debug_mode, :target_log_path, :log_ship_config
 
         def initialize; end
 
         def configure(config_file, suffix)
           config = YAML.load_file(config_file)
+          self.log_ship_config = (config["log"]["log_ship_config"])
           self.solutions_enabled = config["log"]["solutions_enabled"].split(",").map(&:strip)
           self.log_types_enabled = config["log"]["log_types_enabled"].split(",").map(&:strip)
           self.uri_date_pattern = (config["log"]["uri_date_pattern"]).to_s
-          self.audit_repo_url = (config["log"]["audit_repo"]).to_s
-          self.log_repo_url = (config["log"]["log_repo"]).to_s
-          self.target_log_path = (config["log"]["target_log_path"]).to_s
+          self.audit_repo_url = (config["log"]["audit_repo"]).to_s.strip
+          self.log_repo_url = (config["log"]["log_repo"]).to_s.strip
+          self.target_log_path = (config["log"]["target_log_path"]).to_s.strip
           self.debug_mode = (config["log"]["debug_mode"])
         end
 
@@ -136,22 +142,28 @@ module Jfrog
       class ProcessConfig
         include Singleton
         parallel_downloads = 1
+        historical_log_days = 1
 
         def self.parallel_downloads
           parallel_downloads
         end
 
-        attr_accessor :parallel_downloads
+        def self.historical_log_days
+          historical_log_days
+        end
+
+        attr_accessor :parallel_downloads, :historical_log_days
 
         def initialize; end
 
         def configure(config_file, suffix)
           config = YAML.load_file(config_file)
-          self.parallel_downloads = config["process"]["parallel_downloads"]
+          self.parallel_downloads = config["process"]["parallel_downloads"].to_i
+          self.historical_log_days = config["process"]["historical_log_days"].to_i
         end
 
         def to_s
-          "Object_id :#{object_id}, target_jfrt_path :#{target_jfrt_path}, target_jfxr_path:#{target_jfxr_path}, parallel_downloads: #{parallel_downloads}"
+          "Object_id :#{object_id}, parallel_downloads: #{parallel_downloads}, historical_log_days: #{historical_log_days}"
         end
 
       end
@@ -196,7 +208,7 @@ module Jfrog
         def load_all_config(config_file, thread_name)
           @mutex.synchronize do
             if !config_file.nil?
-              CommonUtils.instance.print_msg(nil, "#{thread_name} - Config Start")
+              CommonUtils.instance.print_msg(nil, "#{thread_name} - Configuration Started, loading #{config_file}")
               @conn_config = ConnectionConfig.instance
               @conn_config.configure(config_file, thread_name)
               @log_config = LogConfig.instance
@@ -213,7 +225,7 @@ module Jfrog
               if LogConfig.instance.debug_mode == true
                 CommonUtils.instance.print_msg(nil, "#{thread_name} - Processor Configuration : #{@proc_config}")
               end
-              CommonUtils.instance.print_msg(nil, "#{thread_name} - Config End")
+              CommonUtils.instance.print_msg(nil, "#{thread_name} - Configuration Loaded Successfully")
             else
               CommonUtils.instance.print_msg(nil, "No Config file provided")
             end

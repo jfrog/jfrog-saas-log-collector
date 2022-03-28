@@ -7,6 +7,7 @@ connection:
   open_timeout_in_secs: 20
   read_timeout_in_secs: 60
 log:
+  log_ship_config: "access/api/v1/logshipping/config"
   solutions_enabled: "artifactory, xray"
   log_types_enabled: "access-request, router-request"
   uri_date_pattern: "%Y-%m-%d"
@@ -16,4 +17,6 @@ log:
   target_log_path: "<path_to_extract_logs_for_artifactory>"
 process:
   parallel_downloads: 10
+  historical_log_days: 0
+
 
