@@ -22,3 +22,5 @@ gem "faraday-retry"
 gem "zlib"
 
 gem "parallel"
+
+gem "logger"

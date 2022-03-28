@@ -17,6 +17,7 @@ GEM
       zlib (~> 2.1)
     faraday-net_http (2.0.1)
     faraday-retry (1.0.3)
+    logger (1.5.0)
     minitest (5.15.0)
     parallel (1.21.0)
     parser (3.1.0.0)
@@ -50,6 +51,7 @@ DEPENDENCIES
   faraday-gzip
   faraday-retry
   jfrog-saas-log-collector!
+  logger
   minitest (~> 5.0)
   parallel
   rake (~> 13.0)

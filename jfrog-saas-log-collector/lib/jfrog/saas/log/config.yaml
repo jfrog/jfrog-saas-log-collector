@@ -15,9 +15,10 @@ log:
   log_repo: "artifactory/jfrog-logs"
   debug_mode: false
   target_log_path: "<path_to_extract_logs_for_artifactory>"
+  print_with_utc: false
 process:
-  parallel_downloads: 10
-  historical_log_days: 0
+  parallel_downloads: 2
+  historical_log_days: 2
   write_logs_by_type: false
 
 

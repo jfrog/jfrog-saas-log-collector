@@ -60,8 +60,8 @@ module Jfrog
           end
           response
         rescue Faraday::SSLError, Faraday::ServerError, Faraday::ConnectionFailed => e
-          CommonUtils.instance.print_msg("Error occurred while connecting to #{ConfigHandler.instance.conn_config.jpd_url}, error is -> #{e.message}")
-          CommonUtils.instance.print_msg("Error backtrace #{e.backtrace}")
+          CommonUtils.instance.log_msg("Error occurred while connecting to #{ConfigHandler.instance.conn_config.jpd_url}, error is -> #{e.message}", CommonUtils::LOG_ERROR)
+          CommonUtils.instance.log_msg("Error backtrace #{e.backtrace}", CommonUtils::LOG_ERROR)
         end
 
       end

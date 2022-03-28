@@ -31,11 +31,11 @@ module Jfrog
               target_audit_repo_dir = "#{mapped_solution}/#{mapped_date}"
               target_audit_repo_exists = CommonUtils.instance.check_and_create_audit_repo_tgt_dir(solution, target_audit_repo_dir)
               if target_audit_repo_exists
-                CommonUtils.instance.print_msg(solution, "Executing log download for #{mapped_solution} solution logs for date #{mapped_date}")
-                CommonUtils.instance.print_msg(solution, "Downloading log #{url} of size #{CommonUtils.instance.get_size_in_mb(file_details["size"].to_i, true)}")
+                CommonUtils.instance.log_msg(solution, "Executing log download for #{mapped_solution} solution logs for date #{mapped_date}", CommonUtils::LOG_INFO)
+                CommonUtils.instance.log_msg(solution, "Downloading log #{url} of size #{CommonUtils.instance.get_size_in_mb(file_details["size"].to_i, true)}", CommonUtils::LOG_INFO)
                 CommonUtils.instance.download_and_extract_log(solution, mapped_date, ConfigHandler.instance.log_config.target_log_path, file_name, url)
               else
-                CommonUtils.instance.print_msg(solution, "Audit File creation for #{audit_repo_target_dir_url("#{mapped_solution}/#{mapped_date}", false, true, false)}/#{file_name} failed")
+                CommonUtils.instance.log_msg(solution, "Audit File creation for #{audit_repo_target_dir_url("#{mapped_solution}/#{mapped_date}", false, true, false)}/#{file_name} failed", CommonUtils::LOG_ERROR)
               end
             end
           end
@@ -52,21 +52,22 @@ module Jfrog
         if log_shipping_enabled && log_repo_found && audit_repo_found
           start_date_str = (Date.today - cfg.proc_config.historical_log_days).to_s
           end_date_str = Date.today.to_s
-          CommonUtils.instance.print_msg(nil, "Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url} and audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} found, proceeding with jfrog-saas-log-collector operation")
+          CommonUtils.instance.log_msg(nil, "Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url} and audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} found, proceeding with jfrog-saas-log-collector operation", CommonUtils::LOG_INFO)
           Parallel.map(cfg.log_config.solutions_enabled, in_processes: cfg.proc_config.parallel_downloads) do |solution|
             proc = Processor.new
             logs_to_process = proc.process_logs(solution, start_date_str, end_date_str)
             proc.download_and_extract_logs(solution, logs_to_process)
           end
         elsif !log_shipping_enabled
-          CommonUtils.instance.print_msg(nil, "Log collection is not enabled for #{ConfigHandler.instance.conn_config.jpd_url}, please contact JFrog Support to enable log collection, terminating jfrog-saas-log-collector operation")
+          CommonUtils.instance.log_msg(nil, "Log collection is not enabled for #{ConfigHandler.instance.conn_config.jpd_url}, please contact JFrog Support to enable log collection, terminating jfrog-saas-log-collector operation", CommonUtils::LOG_ERROR)
         elsif log_shipping_enabled && !log_repo_found
-          CommonUtils.instance.print_msg(nil, "Log collection is enabled for #{ConfigHandler.instance.conn_config.jpd_url}, please wait for 24 hours if enabled recently for logs to be collected, terminating jfrog-saas-log-collector operation")
+          CommonUtils.instance.log_msg(nil, "Log collection is enabled for #{ConfigHandler.instance.conn_config.jpd_url}, please wait for 24 hours if enabled recently for logs to be collected, terminating jfrog-saas-log-collector operation", CommonUtils::LOG_ERROR)
         elsif !audit_repo_found
-          CommonUtils.instance.print_msg(nil, "Resource Audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} is not found, terminating jfrog-saas-log-collector operation")
+          CommonUtils.instance.log_msg(nil, "Resource Audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} is not found, terminating jfrog-saas-log-collector operation", CommonUtils::LOG_ERROR)
         else
-          CommonUtils.instance.print_msg(nil, "Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url} not found <OR> audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} is not found, terminating jfrog-saas-log-collector operation")
+          CommonUtils.instance.log_msg(nil, "Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url} not found <OR> audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} is not found, terminating jfrog-saas-log-collector operation", CommonUtils::LOG_ERROR)
         end
+
       end
     end
   end
