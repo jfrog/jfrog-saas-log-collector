@@ -237,6 +237,12 @@ module Jfrog
         @proc_config = nil
         @config_path = nil
 
+        @@file_name = ""
+
+        def self.file_name(fn)
+          @@file_name = fn
+        end
+
         class << self
           attr_reader :conn_config
         end
@@ -249,21 +255,16 @@ module Jfrog
           attr_reader :proc_config
         end
 
-        attr_accessor :conn_config, :log_config, :proc_config
+        attr_accessor :conn_config, :log_config, :proc_config, :file_name
 
-        def initialize
+        def initialize()
           @mutex = Mutex.new
-          # Check from Options
-          OptionParser.new do |parser|
-            parser.on("-c", "--config=CONFIG", String) do |file|
-              puts "File Path is -> #{file}"
-              @config_path = file
-            end
-          end.parse!
           # If not found in options, check for the environment variable
-          @config_path = ENV["LOG_COLLECTOR_CONFIG"] if @config_path.nil?
-          # If not found in environment variable, look for current path
-          @config_path = "config_local.yaml" if @config_path.nil?
+          @config_path = if !@@file_name.nil?
+                           @@file_name
+                         else
+                           ENV["LOG_COLLECTOR_CONFIG"]
+                         end
           load_all_config(@config_path, "initialize")
         end
 

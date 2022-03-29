@@ -22,7 +22,8 @@ module Jfrog
 
         attr_accessor :cfg
 
-        def initialize
+        def initialize(config_path)
+          ConfigHandler.file_name(config_path)
           self.cfg = ConfigHandler.instance
         end
 
@@ -70,9 +71,8 @@ module Jfrog
             end_date_str = Date.today.to_s
             CommonUtils.instance.log_msg(nil, "Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url} and audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} found, proceeding with jfrog-saas-log-collector operation", CommonUtils::LOG_INFO)
             Parallel.map(cfg.log_config.solutions_enabled, in_processes: cfg.proc_config.parallel_process) do |solution|
-              proc = Processor.new
-              logs_to_process = proc.process_logs(solution, start_date_str, end_date_str)
-              proc.download_and_extract_logs(solution, logs_to_process)
+              logs_to_process = process_logs(solution, start_date_str, end_date_str)
+              download_and_extract_logs(solution, logs_to_process)
             end
           elsif !log_shipping_enabled
             CommonUtils.instance.log_msg(nil, "Log collection is not enabled for #{ConfigHandler.instance.conn_config.jpd_url}, please contact JFrog Support to enable log collection, terminating jfrog-saas-log-collector operation", CommonUtils::LOG_ERROR)
@@ -97,6 +97,36 @@ module Jfrog
       end
 
       module Collector
+        config_path = nil
+        OptionParser.new do |parser|
+
+          parser.banner = "Usage: jfrog-saas-log-collector [options]"
+
+          parser.on("-c", "--config=CONFIG", String) do |file|
+            YAML.parse(File.open(file))
+            puts "#{file} \e[32mValid YAML\e[0m"
+            config_path = file
+          rescue StandardError => e
+            puts "#{file} \e[31mInvalid YAML\e[0m"
+            puts e.backtrace.to_s
+            raise
+          end
+
+          parser.on("-h", "--help", "Prints this help") do
+            puts parser
+            exit
+          end
+
+          parser.on("-g", "--generate=CONFIG", "Generates sample config file from template to target file provided") do |target_file|
+            target_file = "jfrog-saas-log-collector-config.yaml" if target_file.nil?
+            template = File.open(File.join(File.dirname(__FILE__), "config.template.yaml"))
+            template_data = template.read
+            File.open(target_file, "w") { |file| file.write(template_data) }
+            template.close
+            exit
+          end
+
+        end.parse!
 
         # Terminate Main Thread Gracefully
         Signal.trap("TERM") do
@@ -112,7 +142,12 @@ module Jfrog
         end
 
         # Run the program
-        Processor.new.execute_in_timer
+        if config_path.nil?
+          puts "\nNo config file provided, use -c option for config file path or provide the path in LOG_COLLECTOR_CONFIG environment variable, shutting down process #{Process.pid}, terminating jfrog-saas-log-collector operation"
+        else
+          puts config_path
+          Processor.new(config_path).execute_in_timer
+        end
 
       end
 
