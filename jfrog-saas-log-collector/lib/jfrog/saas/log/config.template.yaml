@@ -22,5 +22,7 @@ process:
   parallel_downloads: 5
   historical_log_days: 2
   write_logs_by_type: false
+  minutes_between_runs: 180
+
 
 

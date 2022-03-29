@@ -3,6 +3,7 @@
 require "optparse"
 require "yaml"
 require "singleton"
+require 'fileutils'
 
 require_relative "commonutils"
 
@@ -80,7 +81,8 @@ module Jfrog
           config = YAML.load_file(config_file)
           self.target_log_path = (config["log"]["target_log_path"]).to_s.strip
           log_file = "#{target_log_path}/jfrog-saas-collector.log"
-
+          FileUtils.mkdir_p(target_log_path) unless File.directory? target_log_path
+          FileUtils.touch(log_file) unless File.exist? log_file
           self.logger = Logger.new(log_file, "weekly")
           self.console_logger = Logger.new($stdout)
 
@@ -187,6 +189,7 @@ module Jfrog
         parallel_downloads = 1
         historical_log_days = 1
         write_logs_by_type = false
+        minutes_between_runs = 180
 
         def self.parallel_process
           parallel_process
@@ -204,7 +207,11 @@ module Jfrog
           write_logs_by_type
         end
 
-        attr_accessor :parallel_process, :parallel_downloads, :historical_log_days, :write_logs_by_type
+        def self.minutes_between_runs
+          minutes_between_runs
+        end
+
+        attr_accessor :parallel_process, :parallel_downloads, :historical_log_days, :write_logs_by_type, :minutes_between_runs
 
         def initialize; end
 
@@ -221,7 +228,12 @@ module Jfrog
           if config["process"]["historical_log_days"].to_i.positive?
             self.historical_log_days = config["process"]["historical_log_days"].to_i
           end
+
           self.write_logs_by_type = config["process"]["write_logs_by_type"]
+
+          if config["process"]["minutes_between_runs"].to_i.positive?
+            self.historical_log_days = config["process"]["minutes_between_runs"].to_i
+          end
         end
 
         def to_s

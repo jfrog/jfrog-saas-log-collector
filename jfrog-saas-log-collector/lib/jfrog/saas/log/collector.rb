@@ -88,8 +88,9 @@ module Jfrog
 
         def execute_in_timer
           scheduler = Rufus::Scheduler.new
-          scheduler.every "30m", first_in: 1 do
+          scheduler.every "#{ConfigHandler.instance.proc_config.minutes_between_runs}m", first_in: 1 do |job|
             execute
+            CommonUtils.instance.log_msg("NEXT_RUN", "jfrog-saas-log-collector operation will run next at #{job.next_time}", CommonUtils::LOG_INFO)
           end
           scheduler.join
         end
@@ -144,7 +145,6 @@ module Jfrog
         if config_path.nil?
           puts "\nNo config file provided, use -c option for config file path or provide the path in LOG_COLLECTOR_CONFIG environment variable, shutting down process #{Process.pid}, terminating jfrog-saas-log-collector operation"
         else
-          puts config_path
           Processor.new(config_path).execute_in_timer
         end
 
