@@ -107,9 +107,8 @@ module Jfrog
             puts "#{file} \e[32mValid YAML\e[0m"
             config_path = file
           rescue StandardError => e
-            puts "#{file} \e[31mInvalid YAML\e[0m"
-            puts e.backtrace.to_s
-            raise
+            puts "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
+            exit
           end
 
           parser.on("-h", "--help", "Prints this help") do
