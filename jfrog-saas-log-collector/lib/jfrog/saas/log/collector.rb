@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
+require "rufus/scheduler"
 require "parallel"
+
 
 require_relative "collector/version"
 require_relative "confighandler"
 require_relative "commonutils"
+require_relative "filemanager"
 
 module Jfrog
   module Saas
@@ -38,7 +41,6 @@ module Jfrog
             date_detail_arr = date_detail.split(CommonUtils::DELIM)
             mapped_solution = date_detail_arr[0]
             mapped_date = date_detail_arr[1]
-            CommonUtils.instance.log_msg(solution, "Thread opened for log download for #{mapped_solution} solution logs for date #{mapped_date}", CommonUtils::LOG_INFO)
             file_map = logs_map[date_detail]
             file_map&.each do |file_name, file_details|
               url = "#{ConfigHandler.instance.conn_config.end_point_base}/#{file_details["repo"]}/#{file_details["path"]}/#{file_details["name"]}"
@@ -55,6 +57,10 @@ module Jfrog
         end
 
         def execute
+          CommonUtils.instance.log_msg("START", "jfrog-saas-log-collector operation started", CommonUtils::LOG_INFO)
+
+          FileManager.new.purge_data
+
           log_shipping_enabled = CommonUtils.instance.log_shipping_enabled
           log_repo_found = CommonUtils.instance.check_if_resource_exists(nil, CommonUtils.instance.log_repo_url)
           audit_repo_found = CommonUtils.instance.check_and_create_audit_repo
@@ -77,12 +83,37 @@ module Jfrog
           else
             CommonUtils.instance.log_msg(nil, "Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url} not found <OR> audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} is not found, terminating jfrog-saas-log-collector operation", CommonUtils::LOG_ERROR)
           end
+          CommonUtils.instance.log_msg("END", "jfrog-saas-log-collector operation ended", CommonUtils::LOG_INFO)
+        end
+
+        def execute_in_timer
+          scheduler = Rufus::Scheduler.new
+          scheduler.every "30m", first_in: 1 do
+            execute
+          end
+          scheduler.join
         end
 
       end
 
       module Collector
-        Processor.new.execute
+
+        # Terminate Main Thread Gracefully
+        Signal.trap("TERM") do
+          puts "\nShutting down process #{Process.pid}, terminating jfrog-saas-log-collector operation"
+          sleep 1
+          exit
+        end
+
+        Signal.trap("INT") do
+          puts "\nShutting down process #{Process.pid}, terminating jfrog-saas-log-collector operation"
+          sleep 1
+          exit
+        end
+
+        # Run the program
+        Processor.new.execute_in_timer
+
       end
 
     end

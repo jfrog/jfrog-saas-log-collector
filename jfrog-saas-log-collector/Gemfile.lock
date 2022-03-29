@@ -7,6 +7,9 @@ GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.2)
+    concurrent-ruby (1.1.10)
+    et-orbi (1.2.7)
+      tzinfo
     faraday (2.2.0)
       faraday-net_http (~> 2.0)
       ruby2_keywords (>= 0.0.4)
@@ -17,11 +20,15 @@ GEM
       zlib (~> 2.1)
     faraday-net_http (2.0.1)
     faraday-retry (1.0.3)
+    fugit (1.5.2)
+      et-orbi (~> 1.1, >= 1.1.8)
+      raabro (~> 1.4)
     logger (1.5.0)
     minitest (5.15.0)
     parallel (1.21.0)
     parser (3.1.0.0)
       ast (~> 2.4.1)
+    raabro (1.4.0)
     rainbow (3.1.1)
     rake (13.0.6)
     regexp_parser (2.2.0)
@@ -39,6 +46,10 @@ GEM
       parser (>= 3.0.1.1)
     ruby-progressbar (1.11.0)
     ruby2_keywords (0.0.5)
+    rufus-scheduler (3.8.1)
+      fugit (~> 1.1, >= 1.1.6)
+    tzinfo (2.0.4)
+      concurrent-ruby (~> 1.0)
     unicode-display_width (2.1.0)
     zlib (2.1.1)
 
@@ -56,6 +67,7 @@ DEPENDENCIES
   parallel
   rake (~> 13.0)
   rubocop (~> 1.21)
+  rufus-scheduler
   zlib
 
 BUNDLED WITH

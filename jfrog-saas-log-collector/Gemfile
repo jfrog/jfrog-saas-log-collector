@@ -24,3 +24,5 @@ gem "zlib"
 gem "parallel"
 
 gem "logger"
+
+gem "rufus-scheduler"

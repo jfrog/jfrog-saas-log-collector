@@ -22,6 +22,7 @@ module Jfrog
         target_log_path = ""
         debug_mode = false
         print_with_utc = false
+        log_file_retention_days = 7
 
         def self.logger
           logger
@@ -67,7 +68,11 @@ module Jfrog
           print_with_utc
         end
 
-        attr_accessor :solutions_enabled, :log_types_enabled, :uri_date_pattern, :audit_repo_url, :log_repo_url, :debug_mode, :target_log_path, :log_ship_config, :logger, :console_logger, :print_with_utc
+        def self.log_file_retention_days
+          log_file_retention_days
+        end
+
+        attr_accessor :solutions_enabled, :log_types_enabled, :uri_date_pattern, :audit_repo_url, :log_repo_url, :debug_mode, :target_log_path, :log_ship_config, :logger, :console_logger, :print_with_utc, :log_file_retention_days
 
         def initialize; end
 
@@ -80,8 +85,8 @@ module Jfrog
           self.console_logger = Logger.new($stdout)
 
           console_logger.formatter = logger.formatter = proc do |severity, datetime, progname, msg|
-            date_format = datetime.strftime("%Y-%m-%d %H:%M:%S")
-            "[ #{date_format} pid=##{Process.pid} threadid=##{Thread.current.object_id}] #{severity.ljust(5)} --  #{msg}\n"
+            formatted_date = datetime.strftime("%Y-%m-%d %H:%M:%S")
+            "[ #{formatted_date}, p_id=##{Process.pid}, t_id=##{Thread.current.object_id}, #{severity.ljust(5)}] -- #{msg} \n"
           end
 
           self.log_ship_config = (config["log"]["log_ship_config"])
@@ -92,6 +97,10 @@ module Jfrog
           self.log_repo_url = (config["log"]["log_repo"]).to_s.strip
           self.debug_mode = (config["log"]["debug_mode"])
           self.print_with_utc = (config["log"]["print_with_utc"])
+          if (config["log"]["log_file_retention_days"]).to_i.positive?
+            self.log_file_retention_days = (config["log"]["log_file_retention_days"]).to_i
+          end
+
         end
 
         def to_s
@@ -254,7 +263,7 @@ module Jfrog
           # If not found in options, check for the environment variable
           @config_path = ENV["LOG_COLLECTOR_CONFIG"] if @config_path.nil?
           # If not found in environment variable, look for current path
-          @config_path = "config.yaml" if @config_path.nil?
+          @config_path = "config_local.yaml" if @config_path.nil?
           load_all_config(@config_path, "initialize")
         end
 

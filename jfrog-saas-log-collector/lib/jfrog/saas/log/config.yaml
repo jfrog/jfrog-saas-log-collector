@@ -16,6 +16,7 @@ log:
   debug_mode: false
   target_log_path: "<path_to_extract_logs_for_artifactory>"
   print_with_utc: false
+  log_file_retention_days: 5
 process:
   parallel_process: 2
   parallel_downloads: 5

@@ -144,7 +144,7 @@ module Jfrog
 
         def audit_repo_create_file_status_body(file_name, download_extract_status)
           "{
-            \"file_name\": \"#{file_name}\",
+            \"file_name\": \"#{file_name.chomp(CommonUtils::STATUS_FILE_SUFFIX)}\",
             \"download_extract_status\": \"#{download_extract_status}\",
             \"event_time\": \"#{DateTime.now.iso8601}\",
             \"createdBy\": \"jfrog-saas-log-collector\"
