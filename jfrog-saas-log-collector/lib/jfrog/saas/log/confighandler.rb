@@ -81,7 +81,7 @@ module Jfrog
 
           console_logger.formatter = logger.formatter = proc do |severity, datetime, progname, msg|
             date_format = datetime.strftime("%Y-%m-%d %H:%M:%S")
-            "[ #{date_format} pid=##{Process.pid} ] #{severity.ljust(5)} --  #{msg}\n"
+            "[ #{date_format} pid=##{Process.pid} threadid=##{Thread.current.object_id}] #{severity.ljust(5)} --  #{msg}\n"
           end
 
           self.log_ship_config = (config["log"]["log_ship_config"])
@@ -156,8 +156,15 @@ module Jfrog
           self.end_point_base = (config["connection"]["end_point_base"]).to_s.strip
           self.api_key = (config["connection"]["api_key"]).to_s.strip
           self.ignore_errors_in_response = (config["connection"]["ignore_errors_in_response"])
-          self.open_timeout_in_secs = (config["connection"]["open_timeout_in_secs"])
-          self.read_timeout_in_secs = (config["connection"]["read_timeout_in_secs"])
+
+          if config["connection"]["open_timeout_in_secs"].to_i.positive?
+            self.open_timeout_in_secs = config["connection"]["open_timeout_in_secs"].to_i
+          end
+
+          if config["connection"]["read_timeout_in_secs"].to_i.positive?
+            self.read_timeout_in_secs = config["connection"]["read_timeout_in_secs"].to_i
+          end
+
         end
 
         def to_s
@@ -167,9 +174,14 @@ module Jfrog
 
       class ProcessConfig
         include Singleton
+        parallel_process = 1
         parallel_downloads = 1
         historical_log_days = 1
         write_logs_by_type = false
+
+        def self.parallel_process
+          parallel_process
+        end
 
         def self.parallel_downloads
           parallel_downloads
@@ -183,14 +195,23 @@ module Jfrog
           write_logs_by_type
         end
 
-        attr_accessor :parallel_downloads, :historical_log_days, :write_logs_by_type
+        attr_accessor :parallel_process, :parallel_downloads, :historical_log_days, :write_logs_by_type
 
         def initialize; end
 
         def configure(config_file, suffix)
           config = YAML.load_file(config_file)
-          self.parallel_downloads = config["process"]["parallel_downloads"].to_i
-          self.historical_log_days = config["process"]["historical_log_days"].to_i
+          if config["process"]["parallel_process"].to_i.positive?
+            self.parallel_downloads = config["process"]["parallel_process"].to_i
+          end
+
+          if config["process"]["parallel_downloads"].to_i.positive?
+            self.parallel_downloads = config["process"]["parallel_downloads"].to_i
+          end
+
+          if config["process"]["historical_log_days"].to_i.positive?
+            self.historical_log_days = config["process"]["historical_log_days"].to_i
+          end
           self.write_logs_by_type = config["process"]["write_logs_by_type"]
         end
 
