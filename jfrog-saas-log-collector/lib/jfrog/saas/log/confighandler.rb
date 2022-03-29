@@ -232,7 +232,7 @@ module Jfrog
           self.write_logs_by_type = config["process"]["write_logs_by_type"]
 
           if config["process"]["minutes_between_runs"].to_i.positive?
-            self.historical_log_days = config["process"]["minutes_between_runs"].to_i
+            self.minutes_between_runs = config["process"]["minutes_between_runs"].to_i
           end
         end
 

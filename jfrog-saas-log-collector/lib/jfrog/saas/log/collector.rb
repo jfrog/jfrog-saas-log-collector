@@ -90,7 +90,8 @@ module Jfrog
           scheduler = Rufus::Scheduler.new
           scheduler.every "#{ConfigHandler.instance.proc_config.minutes_between_runs}m", first_in: 1 do |job|
             execute
-            CommonUtils.instance.log_msg("NEXT_RUN", "jfrog-saas-log-collector operation will run next at #{job.next_time}", CommonUtils::LOG_INFO)
+            next_execution_time = "#{(Time.now + (ConfigHandler.instance.proc_config.minutes_between_runs * 60)).getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone}"
+            CommonUtils.instance.log_msg("NEXT_RUN", "jfrog-saas-log-collector operation will run next at #{next_execution_time}", CommonUtils::LOG_INFO)
           end
           scheduler.join
         end
