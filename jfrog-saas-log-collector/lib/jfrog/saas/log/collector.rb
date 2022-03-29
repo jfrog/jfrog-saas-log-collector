@@ -3,7 +3,6 @@
 require "rufus/scheduler"
 require "parallel"
 
-
 require_relative "collector/version"
 require_relative "confighandler"
 require_relative "commonutils"
@@ -12,19 +11,11 @@ require_relative "filemanager"
 module Jfrog
   module Saas
     module Log
-
       class Processor
-        cfg = nil
-
-        def self.cfg
-          cfg
-        end
-
-        attr_accessor :cfg
 
         def initialize(config_path)
           ConfigHandler.file_name(config_path)
-          self.cfg = ConfigHandler.instance
+          ConfigHandler.instance
         end
 
         def process_logs(solution, start_date_str, end_date_str)
@@ -38,7 +29,7 @@ module Jfrog
         end
 
         def download_and_extract_logs(solution, logs_map)
-          Parallel.map(logs_map&.keys, in_threads: cfg.proc_config.parallel_downloads) do |date_detail|
+          Parallel.map(logs_map&.keys, in_threads: ConfigHandler.instance.proc_config.parallel_downloads) do |date_detail|
             date_detail_arr = date_detail.split(CommonUtils::DELIM)
             mapped_solution = date_detail_arr[0]
             mapped_date = date_detail_arr[1]
@@ -67,10 +58,10 @@ module Jfrog
           audit_repo_found = CommonUtils.instance.check_and_create_audit_repo
 
           if log_shipping_enabled && log_repo_found && audit_repo_found
-            start_date_str = (Date.today - cfg.proc_config.historical_log_days).to_s
+            start_date_str = (Date.today - ConfigHandler.instance.proc_config.historical_log_days).to_s
             end_date_str = Date.today.to_s
             CommonUtils.instance.log_msg(nil, "Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url} and audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} found, proceeding with jfrog-saas-log-collector operation", CommonUtils::LOG_INFO)
-            Parallel.map(cfg.log_config.solutions_enabled, in_processes: cfg.proc_config.parallel_process) do |solution|
+            Parallel.map(ConfigHandler.instance.log_config.solutions_enabled, in_processes: ConfigHandler.instance.proc_config.parallel_process) do |solution|
               logs_to_process = process_logs(solution, start_date_str, end_date_str)
               download_and_extract_logs(solution, logs_to_process)
             end
@@ -88,27 +79,25 @@ module Jfrog
 
         def execute_in_timer
           scheduler = Rufus::Scheduler.new
-          scheduler.every "#{ConfigHandler.instance.proc_config.minutes_between_runs}m", first_in: 1 do |job|
+          scheduler.every "#{ConfigHandler.instance.proc_config.minutes_between_runs}m", first_in: 1 do
             execute
             next_execution_time = "#{(Time.now + (ConfigHandler.instance.proc_config.minutes_between_runs * 60)).getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone}"
             CommonUtils.instance.log_msg("NEXT_RUN", "jfrog-saas-log-collector operation will run next at #{next_execution_time}", CommonUtils::LOG_INFO)
           end
           scheduler.join
         end
-
       end
 
       module Collector
         config_path = nil
         OptionParser.new do |parser|
-
           parser.banner = "Usage: jfrog-saas-log-collector [options]"
 
           parser.on("-c", "--config=CONFIG", String) do |file|
             YAML.parse(File.open(file))
             puts "#{file} \e[32mValid YAML\e[0m"
             config_path = file
-          rescue StandardError => e
+          rescue StandardError
             puts "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
             exit
           end
@@ -122,11 +111,10 @@ module Jfrog
             target_file = "jfrog-saas-log-collector-config.yaml" if target_file.nil?
             template = File.open(File.join(File.dirname(__FILE__), "config.template.yaml"))
             template_data = template.read
-            File.open(target_file, "w") { |file| file.write(template_data) }
+            File.open(target_file, "w") { |file| file.write(template_data) unless template_data.nil? }
             template.close
             exit
           end
-
         end.parse!
 
         # Terminate Main Thread Gracefully
@@ -148,9 +136,7 @@ module Jfrog
         else
           Processor.new(config_path).execute_in_timer
         end
-
       end
-
     end
   end
 end
