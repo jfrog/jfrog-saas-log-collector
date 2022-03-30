@@ -13,7 +13,6 @@ module Jfrog
   module Saas
     module Log
       class Processor
-
         def initialize(config_path)
           ConfigHandler.file_name(config_path)
           ConfigHandler.instance
@@ -38,7 +37,7 @@ module Jfrog
             file_map&.each do |file_name, file_details|
               url = "#{ConfigHandler.instance.conn_config.end_point_base}/#{file_details["repo"]}/#{file_details["path"]}/#{file_details["name"]}"
               target_audit_repo_dir = "#{mapped_solution}/#{mapped_date}"
-              target_audit_repo_exists = CommonUtils.instance.check_and_create_audit_repo_tgt_dir(solution, target_audit_repo_dir)
+              target_audit_repo_exists = CommonUtils.instance.check_create_tgt_dir(solution, target_audit_repo_dir)
               if target_audit_repo_exists
                 MessageUtils.instance.log_message(MessageUtils::FILE_DOWNLOAD_URL_AND_SIZE, { "param1": url.to_s,
                                                                                               "param2": CommonUtils.instance.get_size_in_mb(file_details["size"].to_i, true).to_s,
@@ -92,7 +91,7 @@ module Jfrog
                                                                                             "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
                                                                                             "#{MessageUtils::SOLUTION}": "INIT" })
           end
-          MessageUtils.instance.log_message(MessageUtils::APPLICATION_STOP, { "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO, "#{MessageUtils::SOLUTION}": "START" })
+          MessageUtils.instance.log_message(MessageUtils::APPLICATION_STOP, { "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO, "#{MessageUtils::SOLUTION}": "STOP" })
         end
 
         def execute_in_timer

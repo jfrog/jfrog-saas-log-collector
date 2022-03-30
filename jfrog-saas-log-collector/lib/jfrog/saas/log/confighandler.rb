@@ -3,7 +3,7 @@
 require "optparse"
 require "yaml"
 require "singleton"
-require 'fileutils'
+require "fileutils"
 
 require_relative "commonutils"
 require_relative "constants"
@@ -13,18 +13,6 @@ module Jfrog
     module Log
       class LogConfig
         include Singleton
-        logger = nil
-        console_logger = nil
-        log_ship_config = ""
-        solutions_enabled = []
-        log_types_enabled = []
-        uri_date_pattern = ""
-        audit_repo_url = ""
-        log_repo_url = ""
-        target_log_path = ""
-        debug_mode = false
-        print_with_utc = false
-        log_file_retention_days = 7
 
         def self.logger
           logger
@@ -78,7 +66,7 @@ module Jfrog
 
         def initialize; end
 
-        def configure(config_file, suffix)
+        def configure(config_file)
           config = YAML.load_file(config_file)
           self.target_log_path = (config["log"]["target_log_path"]).to_s.strip
           log_file = "#{target_log_path}/jfrog-saas-collector.log"
@@ -100,29 +88,20 @@ module Jfrog
           self.log_repo_url = (config["log"]["log_repo"]).to_s.strip
           self.debug_mode = (config["log"]["debug_mode"])
           self.print_with_utc = (config["log"]["print_with_utc"])
-          if (config["log"]["log_file_retention_days"]).to_i.positive?
-            self.log_file_retention_days = (config["log"]["log_file_retention_days"]).to_i
-          end
-
+          self.log_file_retention_days = if (config["log"]["log_file_retention_days"]).to_i.positive?
+                                           (config["log"]["log_file_retention_days"]).to_i
+                                         else
+                                           7
+                                         end
         end
 
         def to_s
           "Object_id :#{object_id}, solutions_enabled :#{solutions_enabled}, log_types_enabled:#{log_types_enabled}, uri_date_pattern: #{uri_date_pattern}"
         end
-
       end
 
       class ConnectionConfig
         include Singleton
-
-        jpd_url = ""
-        end_point_base = ""
-        username = ""
-        access_token = ""
-        api_key = ""
-        ignore_errors_in_response = false
-        open_timeout_in_secs = 5
-        read_timeout_in_secs = 60
 
         def self.jpd_url
           jpd_url
@@ -160,23 +139,26 @@ module Jfrog
 
         def initialize; end
 
-        def configure(config_file, suffix)
+        def configure(config_file)
           config = YAML.load_file(config_file)
           self.jpd_url = (config["connection"]["jpd_url"]).to_s.strip
           self.username = (config["connection"]["username"]).to_s.strip
-          self.access_token = (config["connection"]["access_token"]).to_s.strip # TODO: Check if the Strip is needed for access token, can spaces be at start and end of any token
+          self.access_token = (config["connection"]["access_token"]).to_s.strip
           self.end_point_base = (config["connection"]["end_point_base"]).to_s.strip
           self.api_key = (config["connection"]["api_key"]).to_s.strip
           self.ignore_errors_in_response = (config["connection"]["ignore_errors_in_response"])
 
-          if config["connection"]["open_timeout_in_secs"].to_i.positive?
-            self.open_timeout_in_secs = config["connection"]["open_timeout_in_secs"].to_i
-          end
+          self.open_timeout_in_secs = if config["connection"]["open_timeout_in_secs"].to_i.positive?
+                                        config["connection"]["open_timeout_in_secs"].to_i
+                                      else
+                                        5
+                                      end
 
-          if config["connection"]["read_timeout_in_secs"].to_i.positive?
-            self.read_timeout_in_secs = config["connection"]["read_timeout_in_secs"].to_i
-          end
-
+          self.read_timeout_in_secs = if config["connection"]["read_timeout_in_secs"].to_i.positive?
+                                        config["connection"]["read_timeout_in_secs"].to_i
+                                      else
+                                        60
+                                      end
         end
 
         def to_s
@@ -186,11 +168,6 @@ module Jfrog
 
       class ProcessConfig
         include Singleton
-        parallel_process = 1
-        parallel_downloads = 1
-        historical_log_days = 1
-        write_logs_by_type = false
-        minutes_between_runs = 180
 
         def self.parallel_process
           parallel_process
@@ -216,31 +193,38 @@ module Jfrog
 
         def initialize; end
 
-        def configure(config_file, suffix)
+        def configure(config_file)
           config = YAML.load_file(config_file)
-          if config["process"]["parallel_process"].to_i.positive?
-            self.parallel_downloads = config["process"]["parallel_process"].to_i
-          end
+          self.parallel_downloads = if config["process"]["parallel_process"].to_i.positive?
+                                      config["process"]["parallel_process"].to_i
+                                    else
+                                      1
+                                    end
 
-          if config["process"]["parallel_downloads"].to_i.positive?
-            self.parallel_downloads = config["process"]["parallel_downloads"].to_i
-          end
+          self.parallel_downloads = if config["process"]["parallel_downloads"].to_i.positive?
+                                      config["process"]["parallel_downloads"].to_i
+                                    else
+                                      1
+                                    end
 
-          if config["process"]["historical_log_days"].to_i.positive?
-            self.historical_log_days = config["process"]["historical_log_days"].to_i
-          end
+          self.historical_log_days = if config["process"]["historical_log_days"].to_i.positive?
+                                       config["process"]["historical_log_days"].to_i
+                                     else
+                                       1
+                                     end
 
           self.write_logs_by_type = config["process"]["write_logs_by_type"]
 
-          if config["process"]["minutes_between_runs"].to_i.positive?
-            self.minutes_between_runs = config["process"]["minutes_between_runs"].to_i
-          end
+          self.minutes_between_runs = if config["process"]["minutes_between_runs"].to_i.positive?
+                                        config["process"]["minutes_between_runs"].to_i
+                                      else
+                                        180
+                                      end
         end
 
         def to_s
           "Object_id :#{object_id}, parallel_downloads: #{parallel_downloads}, historical_log_days: #{historical_log_days}, write_logs_by_type: #{write_logs_by_type}"
         end
-
       end
 
       class ConfigHandler
@@ -252,8 +236,8 @@ module Jfrog
 
         @@file_name = ""
 
-        def self.file_name(fn)
-          @@file_name = fn
+        def self.file_name(file_name)
+          @@file_name = file_name
         end
 
         class << self
@@ -270,7 +254,7 @@ module Jfrog
 
         attr_accessor :conn_config, :log_config, :proc_config, :file_name
 
-        def initialize()
+        def initialize
           @mutex = Mutex.new
           # If not found in options, check for the environment variable
           @config_path = if !@@file_name.nil?
@@ -285,25 +269,25 @@ module Jfrog
           @mutex.synchronize do
             if !config_file.nil?
               @log_config = LogConfig.instance
-              @log_config.configure(config_file, thread_name)
+              @log_config.configure(config_file)
               @conn_config = ConnectionConfig.instance
-              @conn_config.configure(config_file, thread_name)
+              @conn_config.configure(config_file)
               @proc_config = ProcessConfig.instance
-              @proc_config.configure(config_file, thread_name)
+              @proc_config.configure(config_file)
 
-              MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_BEGIN, { "param1": thread_name, "param2": config_file, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO } )
+              MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_BEGIN, { "param1": thread_name, "param2": config_file, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO })
               if LogConfig.instance.debug_mode == true
-                MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_DETAIL, { "param1": thread_name, "param2": "#{@conn_config}", "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG} )
+                MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_DETAIL, { "param1": thread_name, "param2": @conn_config.to_s, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG })
               end
               if LogConfig.instance.debug_mode == true
-                MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_DETAIL, { "param1": thread_name, "param2": "#{@log_config}", "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG} )
+                MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_DETAIL, { "param1": thread_name, "param2": @log_config.to_s, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG })
               end
               if LogConfig.instance.debug_mode == true
-                MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_DETAIL, { "param1": thread_name, "param2": "#{@proc_config}", "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG} )
+                MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_DETAIL, { "param1": thread_name, "param2": @proc_config.to_s, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG })
               end
-              MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_END, { "param1": thread_name, "param2": config_file, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO } )
+              MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_END, { "param1": thread_name, "param2": config_file, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO })
             else
-              MessageUtils.instance.log_message(MessageUtils::CONFIG_ERROR_NO_FILE, { "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR } )
+              MessageUtils.instance.log_message(MessageUtils::CONFIG_ERROR_NO_FILE, { "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR })
             end
           end
         end

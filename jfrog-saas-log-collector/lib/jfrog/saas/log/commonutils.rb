@@ -108,10 +108,10 @@ module Jfrog
           }"
         end
 
-        def audit_repo_create_file_status_body(file_name, download_extract_status)
+        def audit_file_status_body(file_name, file_extract_status)
           "{
             \"file_name\": \"#{file_name.chomp(CommonUtils::STATUS_FILE_SUFFIX)}\",
-            \"download_extract_status\": \"#{download_extract_status}\",
+            \"download_extract_status\": \"#{file_extract_status}\",
             \"event_time\": \"#{DateTime.now.iso8601}\",
             \"createdBy\": \"jfrog-saas-log-collector\"
           }"
@@ -232,7 +232,7 @@ module Jfrog
         end
 
 
-        def check_and_create_audit_repo_tgt_dir(solution, tgt_dir_str)
+        def check_create_tgt_dir(solution, tgt_dir_str)
           audit_log_repo_tgt_dir_exists = check_if_resource_exists(solution, audit_repo_target_dir_url(tgt_dir_str, false, false, false))
           unless audit_log_repo_tgt_dir_exists
             conn_mgr = ConnectionManager.new
@@ -260,11 +260,11 @@ module Jfrog
           audit_log_repo_tgt_dir_exists
         end
 
-        def create_audit_file_download_and_extract_status(solution, tgt_date_str, file_name, status)
+        def create_audit_file(solution, tgt_date_str, file_name, status)
           status_audit_success = false
           conn_mgr = ConnectionManager.new
           headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_JSON }
-          response = conn_mgr.execute("#{audit_repo_target_dir_url("#{solution}/#{tgt_date_str}", false, false, false)}/#{file_name}", nil, headers, audit_repo_create_file_status_body(file_name, status), CommonUtils::HTTP_PUT, true)
+          response = conn_mgr.execute("#{audit_repo_target_dir_url("#{solution}/#{tgt_date_str}", false, false, false)}/#{file_name}", nil, headers, audit_file_status_body(file_name, status), CommonUtils::HTTP_PUT, true)
           if !response.nil? && (response.status >= 200 && response.status < 300)
             MessageUtils.instance.log_message(MessageUtils::AUDIT_FILE_CREATION_SUCCESS, { "param1": "#{audit_repo_target_dir_url("#{solution}/#{tgt_date_str}", false, true, false)}/#{file_name}",
                                                                                                  "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
@@ -371,7 +371,7 @@ module Jfrog
                                                                                          "#{MessageUtils::SOLUTION}": solution })
             unzip = Unzip.new
             unzip.extract(solution, relative_url, target_path, log_file_name, response.body)
-            create_audit_file_download_and_extract_status(solution, date, "#{file_name}#{CommonUtils::STATUS_FILE_SUFFIX}", CommonUtils::FILE_PROCESSING_SUCCESS)
+            create_audit_file(solution, date, "#{file_name}#{CommonUtils::STATUS_FILE_SUFFIX}", CommonUtils::FILE_PROCESSING_SUCCESS)
           end
         end
       end
