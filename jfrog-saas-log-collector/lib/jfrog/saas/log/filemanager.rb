@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "confighandler"
+require_relative "constants"
 
 module Jfrog
   module Saas
@@ -19,10 +20,15 @@ module Jfrog
           Dir["#{ConfigHandler.instance.log_config.target_log_path}/**/*.log"].reject { |i| File.directory?(i) }.each do |file_name|
             created_time = File.ctime(file_name)
             diff_days = created_time.to_date.mjd - (Date.today - ConfigHandler.instance.log_config.log_file_retention_days).mjd
-            CommonUtils.instance.log_msg(FileManager::PROCESS_NAME, "File #{file_name} has time of #{diff_days} days to be retained", CommonUtils::LOG_INFO)
+            MessageUtils.instance.log_message(MessageUtils::PURGE_RETAIN_DAYS_FOR_FILE, { "param1": file_name.to_s,
+                                                                                          "param2": diff_days.to_s,
+                                                                                          "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                          "#{MessageUtils::SOLUTION}": FileManager::PROCESS_NAME } )
             if diff_days.negative?
               File.delete(file_name)
-              CommonUtils.instance.log_msg(FileManager::PROCESS_NAME, "File #{file_name} purged successfully", CommonUtils::LOG_INFO)
+              MessageUtils.instance.log_message(MessageUtils::PURGE_SUCCESS_FOR_FILE, { "param1": file_name.to_s,
+                                                                                        "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                        "#{MessageUtils::SOLUTION}": FileManager::PROCESS_NAME } )
             end
           end
         end

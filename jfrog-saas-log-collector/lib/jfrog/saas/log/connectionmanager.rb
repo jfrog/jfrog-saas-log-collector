@@ -9,6 +9,7 @@ require "faraday/gzip"
 
 require_relative "commonutils"
 require_relative "confighandler"
+require_relative "constants"
 
 module Jfrog
   module Saas
@@ -60,8 +61,8 @@ module Jfrog
           end
           response
         rescue Faraday::SSLError, Faraday::ServerError, Faraday::ConnectionFailed => e
-          CommonUtils.instance.log_msg("Error occurred while connecting to #{ConfigHandler.instance.conn_config.jpd_url}, error is -> #{e.message}", CommonUtils::LOG_ERROR)
-          CommonUtils.instance.log_msg("Error backtrace #{e.backtrace}", CommonUtils::LOG_ERROR)
+          MessageUtils.instance.log_message(MessageUtils::CONNECTION_ERROR, { "param1": ConfigHandler.instance.conn_config.jpd_url, "param2":e.message, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR } )
+          MessageUtils.instance.log_message(MessageUtils::ERROR_BACKTRACE, { "param1": e.backtrace, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR } )
         end
 
       end

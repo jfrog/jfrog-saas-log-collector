@@ -6,6 +6,7 @@ require "singleton"
 require 'fileutils'
 
 require_relative "commonutils"
+require_relative "constants"
 
 module Jfrog
   module Saas
@@ -290,20 +291,19 @@ module Jfrog
               @proc_config = ProcessConfig.instance
               @proc_config.configure(config_file, thread_name)
 
-              CommonUtils.instance.log_msg(nil, "#{thread_name} - Configuration Started, loading #{config_file}", CommonUtils::LOG_INFO)
-
+              MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_BEGIN, { "param1": thread_name, "param2": config_file, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO } )
               if LogConfig.instance.debug_mode == true
-                CommonUtils.instance.log_msg(nil, "#{thread_name} - Connection Configuration : #{@conn_config}", CommonUtils::LOG_DEBUG)
+                MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_DETAIL, { "param1": thread_name, "param2": "#{@conn_config}", "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG} )
               end
               if LogConfig.instance.debug_mode == true
-                CommonUtils.instance.log_msg(nil, "#{thread_name} - Logging Configuration : #{@log_config}", CommonUtils::LOG_DEBUG)
+                MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_DETAIL, { "param1": thread_name, "param2": "#{@log_config}", "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG} )
               end
               if LogConfig.instance.debug_mode == true
-                CommonUtils.instance.log_msg(nil, "#{thread_name} - Processor Configuration : #{@proc_config}", CommonUtils::LOG_DEBUG)
+                MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_DETAIL, { "param1": thread_name, "param2": "#{@proc_config}", "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG} )
               end
-              CommonUtils.instance.log_msg(nil, "#{thread_name} - Configuration Loaded Successfully", CommonUtils::LOG_INFO)
+              MessageUtils.instance.log_message(MessageUtils::CONFIG_LOAD_END, { "param1": thread_name, "param2": config_file, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO } )
             else
-              CommonUtils.instance.log_msg(nil, "No Config file provided", CommonUtils::LOG_ERROR)
+              MessageUtils.instance.log_message(MessageUtils::CONFIG_ERROR_NO_FILE, { "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR } )
             end
           end
         end

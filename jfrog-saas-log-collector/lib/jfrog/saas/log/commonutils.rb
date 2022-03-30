@@ -31,40 +31,6 @@ module Jfrog
         LOG_INFO = "info"
         LOG_DEBUG = "debug"
 
-        # LOGGING RELATED SEGMENT - BEGIN
-        def log_message(solution, message, log_level)
-          solution = "default" if solution.nil? || solution.empty?
-          log_line = if !LogConfig.instance.print_with_utc
-                       "| #{solution} | #{message}"
-                     else
-                       "| #{Time.now.getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone} | #{solution} | #{message}"
-                     end
-
-          case log_level
-          when CommonUtils::LOG_ERROR
-            LogConfig.instance.console_logger.error(log_line)
-            LogConfig.instance.logger.error(log_line)
-          when CommonUtils::LOG_WARN
-            LogConfig.instance.console_logger.warn(log_line)
-            LogConfig.instance.logger.warn(log_line)
-          when CommonUtils::LOG_DEBUG
-            LogConfig.instance.console_logger.debug(log_line)
-            LogConfig.instance.logger.debug(log_line)
-          else
-            LogConfig.instance.console_logger.info(log_line)
-            LogConfig.instance.logger.info(log_line)
-          end
-        end
-
-        def log_msg(solution, message, log_level)
-          log_message(solution, message, log_level)
-        end
-
-        def log_msg_pretty_print(solution, message, log_level)
-          log_message(solution, message, log_level)
-        end
-        # LOGGING RELATED SEGMENT - END
-
         # STRING MANIPULATIONS AND OTHER SIMPLE UTILS - BEGIN
         def get_log_url_for_date(solution, date_in_string)
           log_repo_url + "/#{solution}/#{date_in_string}"
@@ -184,7 +150,9 @@ module Jfrog
                          end
           Date.strptime(date_in_str, date_pattern)
         rescue ArgumentError => e
-          CommonUtils.instance.log_msg(solution, "Error occurred while parsing date : #{e.message}, setting current date", CommonUtils::LOG_ERROR)
+          MessageUtils.instance.log_message(MessageUtils::FORCE_USE_CURRENT_DATE, { "param1": e.message.to_s,
+                                                                                    "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                    "#{MessageUtils::SOLUTION}": solution } )
           Date.today
         end
 
@@ -197,13 +165,18 @@ module Jfrog
         def check_if_resource_exists(solution, relative_url)
           resource_exists = false
           conn_mgr = ConnectionManager.new
-          headers = { "Content-Type" => CommonUtils::CONTENT_TYPE_TEXT }
+          headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_TEXT }
           response = conn_mgr.execute(relative_url, nil, headers, nil, CommonUtils::HTTP_GET, true)
           if !response.nil? && response.status >= 200 && response.status < 300
             resource_exists = true
-            CommonUtils.instance.log_msg(solution, "Checking for Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{relative_url} and it is found", CommonUtils::LOG_INFO)
+            MessageUtils.instance.log_message(MessageUtils::RESOURCE_CHECK_SUCCESS, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{relative_url}",
+                                                                                      "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                      "#{MessageUtils::SOLUTION}": solution } )
           else
-            CommonUtils.instance.log_msg(solution, "Checking for Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{relative_url} and it is not found, server response -> \n#{response.body}", CommonUtils::LOG_ERROR)
+            MessageUtils.instance.log_message(MessageUtils::RESOURCE_CHECK_FAILED_DETAIL, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{relative_url}",
+                                                                                            "param2": response.body.to_s,
+                                                                                            "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                            "#{MessageUtils::SOLUTION}": solution } )
           end
           resource_exists
         end
@@ -211,13 +184,19 @@ module Jfrog
         def log_shipping_enabled
           log_shipping = false
           conn_mgr = ConnectionManager.new
-          headers = { "Content-Type" => CommonUtils::CONTENT_TYPE_JSON }
+          headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_JSON }
           response = conn_mgr.execute(log_ship_config_url, nil, headers, nil, CommonUtils::HTTP_GET, true)
           if !response.nil? && response.status >= 200 && response.status < 300
             log_shipping = response.body["enabled"]
-            CommonUtils.instance.log_msg(nil, "Log shipping is -> #{log_shipping} on #{ConfigHandler.instance.conn_config.jpd_url}/#{log_ship_config_url}", CommonUtils::LOG_INFO)
+            MessageUtils.instance.log_message(MessageUtils::LOG_SHIPPING_ENABLED, { "param1": log_shipping.to_s,
+                                                                                    "param2": "#{ConfigHandler.instance.conn_config.jpd_url}/#{log_ship_config_url}",
+                                                                                    "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                    "#{MessageUtils::SOLUTION}": "INIT" } )
           else
-            CommonUtils.instance.log_msg(nil, "Log shipping check error on #{ConfigHandler.instance.conn_config.jpd_url}/#{log_ship_config_url}, server response -> \n#{response.body}", CommonUtils::LOG_ERROR)
+            MessageUtils.instance.log_message(MessageUtils::LOG_SHIPPING_CHECK_CALL_FAIL_DETAIL, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{log_ship_config_url}",
+                                                                                                   "param2": response.body.to_s,
+                                                                                                   "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                   "#{MessageUtils::SOLUTION}": "INIT" } )
           end
           log_shipping
         end
@@ -226,14 +205,26 @@ module Jfrog
           audit_log_repo_exists = check_if_resource_exists(nil, CommonUtils.instance.audit_repo_url)
           unless audit_log_repo_exists
             conn_mgr = ConnectionManager.new
-            headers = { "Content-Type" => CommonUtils::CONTENT_TYPE_JSON }
-            CommonUtils.instance.log_msg(nil, "URL: #{audit_repo_create_url}, \n headers: #{headers}, \n body: #{audit_repo_create_body} ", CommonUtils::LOG_DEBUG) if ConfigHandler.instance.log_config.debug_mode
-            response = conn_mgr.execute(audit_repo_create_url, nil, headers, audit_repo_create_body, CommonUtils::HTTP_PUT, true)
+            headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_JSON }
+            body = audit_repo_create_url
+            if ConfigHandler.instance.log_config.debug_mode
+              MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_CHECK_CALL_DETAIL, { "param1": audit_repo_create_url.to_s,
+                                                                                              "param2": headers.to_s,
+                                                                                              "param3": audit_repo_create_body.to_s,
+                                                                                              "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG,
+                                                                                              "#{MessageUtils::SOLUTION}": nil })
+            end
+            response = conn_mgr.execute(audit_repo_create_url, nil, headers, body, CommonUtils::HTTP_PUT, true)
             if !response.nil? && (response.status >= 200 && response.status < 300)
-              CommonUtils.instance.log_msg(nil, "Audit Logs Repo #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} successfully created", CommonUtils::LOG_INFO)
+              MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_CREATION_SUCCESS, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url}",
+                                                                                             "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                             "#{MessageUtils::SOLUTION}": nil })
               audit_log_repo_exists = true
             else
-              CommonUtils.instance.log_msg(nil, "Audit Logs Repo #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} error in creation, server response -> \n#{response.body}", CommonUtils::LOG_ERROR)
+              MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_CREATION_FAILED_DETAIL, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url}",
+                                                                                                   "param2": response.body.to_s,
+                                                                                                   "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                   "#{MessageUtils::SOLUTION}": nil })
               audit_log_repo_exists = false
             end
           end
@@ -245,14 +236,25 @@ module Jfrog
           audit_log_repo_tgt_dir_exists = check_if_resource_exists(solution, audit_repo_target_dir_url(tgt_dir_str, false, false, false))
           unless audit_log_repo_tgt_dir_exists
             conn_mgr = ConnectionManager.new
-            headers = { "Content-Type" => CommonUtils::CONTENT_TYPE_JSON }
-            CommonUtils.instance.log_msg(solution, "URL: #{audit_repo_target_dir_url(tgt_dir_str, false, true, true)}, \n headers: #{headers}, \n body: #{audit_repo_create_tgt_dir_body(tgt_dir_str)} ",CommonUtils::LOG_DEBUG) if ConfigHandler.instance.log_config.debug_mode
+            headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_JSON }
+            if ConfigHandler.instance.log_config.debug_mode
+              MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_TGT_DIR_CHECK_CALL_DETAIL, { "param1": "#{audit_repo_target_dir_url(tgt_dir_str, false, true, true)}",
+                                                                                                      "param2": headers.to_s,
+                                                                                                      "param3": audit_repo_create_tgt_dir_body(tgt_dir_str).to_s,
+                                                                                                      "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG,
+                                                                                                      "#{MessageUtils::SOLUTION}": solution })
+            end
             response = conn_mgr.execute(audit_repo_target_dir_url(tgt_dir_str, false, false, true), nil, headers, audit_repo_create_tgt_dir_body(tgt_dir_str), CommonUtils::HTTP_PUT, true)
             if !response.nil? && (response.status >= 200 && response.status < 300)
-              CommonUtils.instance.log_msg(solution, "Audit Logs Target #{audit_repo_target_dir_url(tgt_dir_str, false, true, false)} successfully created", CommonUtils::LOG_INFO)
+              MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_TGT_DIR_CREATION_SUCCESS, { "param1": "#{audit_repo_target_dir_url(tgt_dir_str, false, true, false)}",
+                                                                                                     "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                                     "#{MessageUtils::SOLUTION}": nil })
               audit_log_repo_tgt_dir_exists = true
             else
-              CommonUtils.instance.log_msg(solution, "Audit Logs Target #{audit_repo_target_dir_url(tgt_dir_str, false, true, false)} error in creation, server response -> \n#{response.body}", CommonUtils::LOG_ERROR)
+              MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_TGT_DIR_CREATION_FAILED_DETAIL, { "param1": "#{audit_repo_target_dir_url(tgt_dir_str, false, true, false)}",
+                                                                                                           "param2": response.body.to_s,
+                                                                                                           "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                           "#{MessageUtils::SOLUTION}": solution })
             end
           end
           audit_log_repo_tgt_dir_exists
@@ -261,58 +263,87 @@ module Jfrog
         def create_audit_file_download_and_extract_status(solution, tgt_date_str, file_name, status)
           status_audit_success = false
           conn_mgr = ConnectionManager.new
-          headers = { "Content-Type" => CommonUtils::CONTENT_TYPE_JSON }
+          headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_JSON }
           response = conn_mgr.execute("#{audit_repo_target_dir_url("#{solution}/#{tgt_date_str}", false, false, false)}/#{file_name}", nil, headers, audit_repo_create_file_status_body(file_name, status), CommonUtils::HTTP_PUT, true)
           if !response.nil? && (response.status >= 200 && response.status < 300)
-            CommonUtils.instance.log_msg(solution, "Audit File for #{audit_repo_target_dir_url("#{solution}/#{tgt_date_str}", false, true, false)}/#{file_name} successfully created", CommonUtils::LOG_INFO)
+            MessageUtils.instance.log_message(MessageUtils::AUDIT_FILE_CREATION_SUCCESS, { "param1": "#{audit_repo_target_dir_url("#{solution}/#{tgt_date_str}", false, true, false)}/#{file_name}",
+                                                                                                 "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                                 "#{MessageUtils::SOLUTION}": solution })
             status_audit_success = true
           else
-            CommonUtils.instance.log_msg(solution, "Error while creating audit for #{audit_repo_target_dir_url("#{solution}/#{tgt_date_str}", false, true, false)}/#{file_name}, server response -> \n#{response.body}", CommonUtils::LOG_ERROR)
+            MessageUtils.instance.log_message(MessageUtils::AUDIT_FILE_CREATION_FAILED_DETAIL, { "param1": "#{audit_repo_target_dir_url("#{solution}/#{tgt_date_str}", false, true, false)}/#{file_name}",
+                                                                                                 "param2": response.body.to_s,
+                                                                                                 "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                 "#{MessageUtils::SOLUTION}": solution })
           end
           status_audit_success
         end
 
-        def logs_to_process_hash(solution, date_in_string)
+        def logs_processed(solution, date_in_string)
           logs_processed = []
-          logs_to_process = {}
-
           conn_mgr = ConnectionManager.new
           body = audit_aql_body(solution, date_in_string)
-          headers = { "Content-Type" => CommonUtils::CONTENT_TYPE_TEXT }
-          CommonUtils.instance.log_msg(solution, "Fetching list of processed logs from AQL with params -> #{body}", CommonUtils::LOG_DEBUG) if ConfigHandler.instance.log_config.debug_mode
+          headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_TEXT }
+          if ConfigHandler.instance.log_config.debug_mode
+            MessageUtils.instance.log_message(MessageUtils::PROCESSED_LOGS_AQL_QUERY_RESULT, { "param1": body.to_s,
+                                                                                               "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG,
+                                                                                               "#{MessageUtils::SOLUTION}": solution })
+          end
           response = conn_mgr.execute(artifactory_aql_url, nil, headers, body, CommonUtils::HTTP_POST, false)
           if !response.nil? && (response.status >= 200 && response.status < 300) && response.headers[CommonUtils::CONTENT_TYPE_HDR] == CommonUtils::CONTENT_TYPE_JSON
             parsed_json = JSON.parse(response.body)
             total_records = parsed_json["range"]["total"]
             if total_records.positive?
               results = parsed_json["results"]
-              CommonUtils.instance.log_msg(solution, "Resulting Processed Logs for #{date_in_string} -> #{results}", CommonUtils::LOG_INFO)
+              MessageUtils.instance.log_message(MessageUtils::DATE_VS_PROCESSED_LOGS_DATA, { "param1": date_in_string.to_s,
+                                                                                             "param2": results.to_s,
+                                                                                             "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                             "#{MessageUtils::SOLUTION}": solution })
               results.each do |log_file_detail|
                 logs_processed.push(log_file_detail["name"].chomp(CommonUtils::STATUS_FILE_SUFFIX))
               end
             end
           end
+          logs_processed
+        end
 
-
+        def logs_to_process_hash(solution, date_in_string)
+          logs_processed = logs_processed(solution, date_in_string)
+          logs_to_process = {}
+          conn_mgr = ConnectionManager.new
           body = artifactory_aql_body(solution, date_in_string)
-          CommonUtils.instance.log_msg(solution, "Fetching list of logs from AQL with params -> #{body}", CommonUtils::LOG_DEBUG) if ConfigHandler.instance.log_config.debug_mode
+          headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_TEXT }
+          if ConfigHandler.instance.log_config.debug_mode
+            MessageUtils.instance.log_message(MessageUtils::UNPROCESSED_LOGS_AQL_QUERY_RESULT, { "param1": body.to_s,
+                                                                                                 "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG,
+                                                                                                 "#{MessageUtils::SOLUTION}": solution })
+          end
           response = conn_mgr.execute(artifactory_aql_url, nil, headers, body, CommonUtils::HTTP_POST, false)
           if !response.nil? && (response.status >= 200 && response.status < 300) && response.headers[CommonUtils::CONTENT_TYPE_HDR] == CommonUtils::CONTENT_TYPE_JSON
             parsed_json = JSON.parse(response.body)
             total_records = parsed_json["range"]["total"]
             if total_records.positive?
               results = parsed_json["results"]
-              CommonUtils.instance.log_msg(solution, "Resulting Logs for #{date_in_string} -> #{results}", CommonUtils::LOG_INFO)
+              MessageUtils.instance.log_message(MessageUtils::DATE_VS_LOGS_DATA, { "param1": date_in_string.to_s,
+                                                                                   "param2": results.to_s,
+                                                                                   "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                   "#{MessageUtils::SOLUTION}": solution })
               results.each do |log_file_detail|
                 if logs_processed.include? log_file_detail["name"]
-                  CommonUtils.instance.log_msg(solution, "#{log_file_detail["name"]} is already processed, skipping", CommonUtils::LOG_INFO)
+                  MessageUtils.instance.log_message(MessageUtils::LOG_PROCESSED_EXCLUDE, { "param1": log_file_detail["name"].to_s,
+                                                                                           "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                           "#{MessageUtils::SOLUTION}": solution })
                 elsif ConfigHandler.instance.log_config.log_types_enabled.any? { |log_type| log_file_detail["name"].include? log_type }
-                  CommonUtils.instance.log_msg(solution, "#{log_file_detail["name"]} is not processed, including", CommonUtils::LOG_INFO)
+                  MessageUtils.instance.log_message(MessageUtils::LOG_NOT_PROCESSED_INCLUDE, { "param1": log_file_detail["name"].to_s,
+                                                                                               "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                               "#{MessageUtils::SOLUTION}": solution })
                   logs_to_process[log_file_detail["name"]] = log_file_detail
                 end
               end
             else
-              CommonUtils.instance.log_msg(solution, "Resulting Logs for #{date_in_string} -> NONE", CommonUtils::LOG_INFO)
+              MessageUtils.instance.log_message(MessageUtils::NO_LOGS_FOR_DATE, { "param1": date_in_string.to_s,
+                                                                                  "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                  "#{MessageUtils::SOLUTION}": solution })
             end
           end
           logs_to_process
@@ -322,7 +353,7 @@ module Jfrog
         def download_and_extract_log(solution, date, target_path, file_name, relative_url)
           conn_mgr = ConnectionManager.new
           headers = {
-            "Content-Type" => CommonUtils::CONTENT_TYPE_TEXT,
+            CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_TEXT,
             "Accept-Encoding" => "gzip, deflate",
             "Accept" => "text/plain,text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
           }
@@ -334,13 +365,15 @@ module Jfrog
                 log_file_name = "#{log_type}.log" if log_file_name.include? log_type
               end
             end
-            CommonUtils.instance.log_msg(solution, "Downloaded log #{relative_url} and extracting it to #{target_path}/#{solution}/#{log_file_name}", CommonUtils::LOG_INFO)
+            MessageUtils.instance.log_message(MessageUtils::DOWNLOAD_FILE_AND_EXTRACT, { "param1": relative_url.to_s,
+                                                                                         "param2": "#{target_path}/#{solution}/#{log_file_name}",
+                                                                                         "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                         "#{MessageUtils::SOLUTION}": solution })
             unzip = Unzip.new
             unzip.extract(solution, relative_url, target_path, log_file_name, response.body)
             create_audit_file_download_and_extract_status(solution, date, "#{file_name}#{CommonUtils::STATUS_FILE_SUFFIX}", CommonUtils::FILE_PROCESSING_SUCCESS)
           end
         end
-
       end
     end
   end

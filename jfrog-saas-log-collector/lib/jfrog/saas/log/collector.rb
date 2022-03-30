@@ -7,6 +7,7 @@ require_relative "collector/version"
 require_relative "confighandler"
 require_relative "commonutils"
 require_relative "filemanager"
+require_relative "constants"
 
 module Jfrog
   module Saas
@@ -39,17 +40,22 @@ module Jfrog
               target_audit_repo_dir = "#{mapped_solution}/#{mapped_date}"
               target_audit_repo_exists = CommonUtils.instance.check_and_create_audit_repo_tgt_dir(solution, target_audit_repo_dir)
               if target_audit_repo_exists
-                CommonUtils.instance.log_msg(solution, "Downloading log #{url} of size #{CommonUtils.instance.get_size_in_mb(file_details["size"].to_i, true)}", CommonUtils::LOG_INFO)
+                MessageUtils.instance.log_message(MessageUtils::FILE_DOWNLOAD_URL_AND_SIZE, { "param1": url.to_s,
+                                                                                              "param2": CommonUtils.instance.get_size_in_mb(file_details["size"].to_i, true).to_s,
+                                                                                              "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                              "#{MessageUtils::SOLUTION}": solution })
                 CommonUtils.instance.download_and_extract_log(solution, mapped_date, ConfigHandler.instance.log_config.target_log_path, file_name, url)
               else
-                CommonUtils.instance.log_msg(solution, "Audit File creation for #{audit_repo_target_dir_url("#{mapped_solution}/#{mapped_date}", false, true, false)}/#{file_name} failed", CommonUtils::LOG_ERROR)
+                MessageUtils.instance.log_message(MessageUtils::AUDIT_FILE_CREATION_FAILED, { "param1": "#{audit_repo_target_dir_url("#{mapped_solution}/#{mapped_date}", false, true, false)}/#{file_name}",
+                                                                                              "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                              "#{MessageUtils::SOLUTION}": solution })
               end
             end
           end
         end
 
         def execute
-          CommonUtils.instance.log_msg("START", "jfrog-saas-log-collector operation started", CommonUtils::LOG_INFO)
+          MessageUtils.instance.log_message(MessageUtils::APPLICATION_START, { "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO, "#{MessageUtils::SOLUTION}": "START" })
 
           FileManager.new.purge_data
 
@@ -60,21 +66,33 @@ module Jfrog
           if log_shipping_enabled && log_repo_found && audit_repo_found
             start_date_str = (Date.today - ConfigHandler.instance.proc_config.historical_log_days).to_s
             end_date_str = Date.today.to_s
-            CommonUtils.instance.log_msg(nil, "Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url} and audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} found, proceeding with jfrog-saas-log-collector operation", CommonUtils::LOG_INFO)
+            MessageUtils.instance.log_message(MessageUtils::INIT_VERIFICATION, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url}",
+                                                                                 "param2": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url}",
+                                                                                 "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                 "#{MessageUtils::SOLUTION}": "START" })
             Parallel.map(ConfigHandler.instance.log_config.solutions_enabled, in_processes: ConfigHandler.instance.proc_config.parallel_process) do |solution|
               logs_to_process = process_logs(solution, start_date_str, end_date_str)
               download_and_extract_logs(solution, logs_to_process)
             end
           elsif !log_shipping_enabled
-            CommonUtils.instance.log_msg(nil, "Log collection is not enabled for #{ConfigHandler.instance.conn_config.jpd_url}, please contact JFrog Support to enable log collection, terminating jfrog-saas-log-collector operation", CommonUtils::LOG_ERROR)
+            MessageUtils.instance.log_message(MessageUtils::LOG_SHIPPING_NOT_ENABLED, { "param1": ConfigHandler.instance.conn_config.jpd_url.to_s,
+                                                                                        "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                        "#{MessageUtils::SOLUTION}": "INIT" })
           elsif log_shipping_enabled && !log_repo_found
-            CommonUtils.instance.log_msg(nil, "Log collection is enabled for #{ConfigHandler.instance.conn_config.jpd_url}, please wait for 24 hours if enabled recently for logs to be collected, terminating jfrog-saas-log-collector operation", CommonUtils::LOG_ERROR)
+            MessageUtils.instance.log_message(MessageUtils::LOG_SHIPPING_ENABLED_LOGS_NOT_COLLECTABLE, { "param1": ConfigHandler.instance.conn_config.jpd_url.to_s,
+                                                                                                         "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                                         "#{MessageUtils::SOLUTION}": "INIT" })
           elsif !audit_repo_found
-            CommonUtils.instance.log_msg(nil, "Resource Audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} is not found, terminating jfrog-saas-log-collector operation", CommonUtils::LOG_ERROR)
+            MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_NOT_FOUND_APPLICATION_STOP, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url}",
+                                                                                                     "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                     "#{MessageUtils::SOLUTION}": "INIT" })
           else
-            CommonUtils.instance.log_msg(nil, "Resource #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url} not found <OR> audit log repo  #{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url} is not found, terminating jfrog-saas-log-collector operation", CommonUtils::LOG_ERROR)
+            MessageUtils.instance.log_message(MessageUtils::INIT_FAILED_APPLICATION_STOP, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url}",
+                                                                                            "param2": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url}",
+                                                                                            "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                            "#{MessageUtils::SOLUTION}": "INIT" })
           end
-          CommonUtils.instance.log_msg("END", "jfrog-saas-log-collector operation ended", CommonUtils::LOG_INFO)
+          MessageUtils.instance.log_message(MessageUtils::APPLICATION_STOP, { "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO, "#{MessageUtils::SOLUTION}": "START" })
         end
 
         def execute_in_timer
@@ -82,7 +100,9 @@ module Jfrog
           scheduler.every "#{ConfigHandler.instance.proc_config.minutes_between_runs}m", first_in: 1 do
             execute
             next_execution_time = "#{(Time.now + (ConfigHandler.instance.proc_config.minutes_between_runs * 60)).getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone}"
-            CommonUtils.instance.log_msg("NEXT_RUN", "jfrog-saas-log-collector operation will run next at #{next_execution_time}", CommonUtils::LOG_INFO)
+            MessageUtils.instance.log_message(MessageUtils::SCHEDULER_NEXT_RUN, { "param1": next_execution_time,
+                                                                                  "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                  "#{MessageUtils::SOLUTION}": "NEXT_RUN" })
           end
           scheduler.join
         end
@@ -113,6 +133,7 @@ module Jfrog
             template_data = template.read
             File.open(target_file, "w") { |file| file.write(template_data) unless template_data.nil? }
             template.close
+            puts "Config file from template written successfully to #{target_file}, modify necessary values before use"
             exit
           end
         end.parse!

@@ -5,6 +5,7 @@ require "stringio"
 
 require_relative "commonutils"
 require_relative "filemanager"
+require_relative "constants"
 
 module Jfrog
   module Saas
@@ -17,7 +18,10 @@ module Jfrog
             File.open("#{sol_tgt_path}/#{target_file_name}", "a") do |fp|
               fp.write(Zlib::GzipReader.new(StringIO.new(gzip_content)).read)
             end
-            CommonUtils.instance.log_msg(solution, "Extracted log #{source_file} successfully written the content to #{sol_tgt_path}/#{target_file_name}", CommonUtils::LOG_INFO)
+            MessageUtils.instance.log_message(MessageUtils::EXTRACT_LOG_FILE_SUCCESS, { "param1": source_file.to_s,
+                                                                                        "param2": "#{sol_tgt_path}/#{target_file_name}",
+                                                                                        "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                        "#{MessageUtils::SOLUTION}": solution })
           end
         end
       end
