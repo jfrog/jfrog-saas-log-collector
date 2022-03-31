@@ -71,7 +71,7 @@ module Jfrog
             MessageUtils.instance.log_message(MessageUtils::INIT_VERIFICATION, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url}",
                                                                                  "param2": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url}",
                                                                                  "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
-                                                                                 "#{MessageUtils::SOLUTION}": "START" })
+                                                                                 "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_START })
             Parallel.map(ConfigHandler.instance.log_config.solutions_enabled, in_processes: ConfigHandler.instance.proc_config.parallel_process) do |solution|
               logs_to_process = process_logs(solution, start_date_str, end_date_str)
               download_and_extract_logs(solution, logs_to_process)
@@ -79,22 +79,22 @@ module Jfrog
           elsif !log_shipping_enabled
             MessageUtils.instance.log_message(MessageUtils::LOG_SHIPPING_NOT_ENABLED, { "param1": ConfigHandler.instance.conn_config.jpd_url.to_s,
                                                                                         "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
-                                                                                        "#{MessageUtils::SOLUTION}": "INIT" })
+                                                                                        "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_INIT })
           elsif log_shipping_enabled && !log_repo_found
             MessageUtils.instance.log_message(MessageUtils::LOG_SHIPPING_ENABLED_LOGS_NOT_COLLECTABLE, { "param1": ConfigHandler.instance.conn_config.jpd_url.to_s,
                                                                                                          "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
-                                                                                                         "#{MessageUtils::SOLUTION}": "INIT" })
+                                                                                                         "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_INIT })
           elsif !audit_repo_found
             MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_NOT_FOUND_APPLICATION_STOP, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url}",
                                                                                                      "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                                     "#{MessageUtils::SOLUTION}": "INIT" })
+                                                                                                     "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_INIT })
           else
             MessageUtils.instance.log_message(MessageUtils::INIT_FAILED_APPLICATION_STOP, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.log_repo_url}",
                                                                                             "param2": "#{ConfigHandler.instance.conn_config.jpd_url}/#{CommonUtils.instance.audit_repo_url}",
                                                                                             "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                            "#{MessageUtils::SOLUTION}": "INIT" })
+                                                                                            "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_INIT })
           end
-          MessageUtils.instance.log_message(MessageUtils::APPLICATION_STOP, { "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO, "#{MessageUtils::SOLUTION}": "STOP" })
+          MessageUtils.instance.log_message(MessageUtils::APPLICATION_STOP, { "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO, "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_STOP })
         end
 
         def execute_in_timer
@@ -104,7 +104,7 @@ module Jfrog
             next_execution_time = "#{(Time.now + (ConfigHandler.instance.proc_config.minutes_between_runs * 60)).getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone}"
             MessageUtils.instance.log_message(MessageUtils::SCHEDULER_NEXT_RUN, { "param1": next_execution_time,
                                                                                   "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
-                                                                                  "#{MessageUtils::SOLUTION}": "NEXT_RUN" })
+                                                                                  "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_NEXT_RUN })
           end
           scheduler.join
         end
@@ -124,7 +124,7 @@ module Jfrog
           rescue JSON::Schema::ValidationError
             MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_VALIDATION_FAILED_DETAILS, { "param1": $ERROR_INFO.message,
                                                                                                      "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                                     "#{MessageUtils::SOLUTION}": "TERMINATE" })
+                                                                                                     "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
           end
           config_valid
         end
@@ -147,14 +147,14 @@ module Jfrog
               else
                 MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_PROVIDED_IS_NOT_VALID, { "param1": file.to_s,
                                                                                                      "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                                     "#{MessageUtils::SOLUTION}": "TERMINATE" })
+                                                                                                     "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
                 Thread.kill main
                 exit 130
               end
             rescue StandardError
               MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_PROVIDED_IS_NOT_VALID, { "param1": file.to_s,
                                                                                                    "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                                   "#{MessageUtils::SOLUTION}": "TERMINATE" })
+                                                                                                   "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
               exit 130
             end
 
@@ -179,7 +179,7 @@ module Jfrog
         rescue OptionParser::ParseError => e
           MessageUtils.instance.put_message(MessageUtils::RECEIVED_AN_INVALID_OPTION_FLAG, { "param1": e.to_s,
                                                                                              "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                             "#{MessageUtils::SOLUTION}": "TERMINATE" })
+                                                                                             "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
           exit 130
         end
 
@@ -188,7 +188,7 @@ module Jfrog
         Signal.trap("TERM") do
           MessageUtils.instance.put_message(MessageUtils::SHUT_DOWN_PROCESS, { "param1": Process.pid.to_s,
                                                                                "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                               "#{MessageUtils::SOLUTION}": "TERMINATE" })
+                                                                               "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
           sleep 1
           Thread.list.each do |thread|
             warn "Terminating thread t_id - ##{thread.object_id}"
@@ -200,12 +200,12 @@ module Jfrog
         Signal.trap("INT") do
           MessageUtils.instance.put_message(MessageUtils::SHUT_DOWN_PROCESS, { "param1": Process.pid.to_s,
                                                                                "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                               "#{MessageUtils::SOLUTION}": "TERMINATE" })
+                                                                               "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
           sleep 1
           Thread.list.each do |thread|
             MessageUtils.instance.put_message(MessageUtils::TERMINATING_THREAD, { "param1": thread.object_id.to_s,
                                                                                   "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                  "#{MessageUtils::SOLUTION}": "TERMINATE" })
+                                                                                  "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
             Thread.kill thread
           end
           exit 130
@@ -215,11 +215,11 @@ module Jfrog
         if config_path.nil?
           MessageUtils.instance.put_message(MessageUtils::NO_CONFIG_FILE_PROVIDED, { "param1": Process.pid.to_s,
                                                                                      "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                     "#{MessageUtils::SOLUTION}": "TERMINATE" })
+                                                                                     "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
           Thread.list.each do |thread|
             MessageUtils.instance.put_message(MessageUtils::TERMINATING_THREAD, { "param1": thread.object_id.to_s,
                                                                                   "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                  "#{MessageUtils::SOLUTION}": "TERMINATE" })
+                                                                                  "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
             Thread.kill thread
           end
           exit 130

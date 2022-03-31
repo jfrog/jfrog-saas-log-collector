@@ -70,14 +70,21 @@ module Jfrog
         SHUT_DOWN_PROCESS = "Shutting down process p_id #%<param1>s, terminating jfrog-saas-log-collector operation"
         TERMINATING_THREAD = "Terminating thread t_id - #%<param1>s"
 
+        SOLUTION_OVERRIDE_TERMINATE = "terminate"
+        SOLUTION_OVERRIDE_INIT = "init"
+        SOLUTION_OVERRIDE_START = "start"
+        SOLUTION_OVERRIDE_STOP = "stop"
+        SOLUTION_OVERRIDE_DEFAULT = "default"
+        SOLUTION_OVERRIDE_NEXT_RUN = "next-run"
+
         # LOGGING RELATED SEGMENT - BEGIN
 
         def handle_log(solution, message, log_level)
-          solution = "default" if solution.nil? || solution.empty?
+          solution = MessageUtils::SOLUTION_OVERRIDE_DEFAULT if solution.nil? || solution.empty?
           log_line = if !LogConfig.instance.print_with_utc
-                       "| #{solution} | #{message}"
+                       "| #{solution.upcase} | #{message}"
                      else
-                       "| #{Time.now.getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone} | #{solution} | #{message}"
+                       "| #{Time.now.getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone} | #{solution.upcase} | #{message}"
                      end
 
           case log_level
@@ -98,11 +105,12 @@ module Jfrog
 
         def handle_put(solution, message, log_level)
           formatted_date = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+          solution = MessageUtils::SOLUTION_OVERRIDE_DEFAULT if solution.nil? || solution.empty?
           case log_level
           when CommonUtils::LOG_ERROR || CommonUtils::LOG_WARN
-            warn "[ #{formatted_date}, p_id=##{Process.pid}, t_id=##{Thread.current.object_id}, #{CommonUtils::LOG_ERROR.upcase} ] -- | #{Time.now.getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone} | #{solution} | #{message}"
+            warn "[ #{formatted_date}, p_id=##{Process.pid}, t_id=##{Thread.current.object_id}, #{CommonUtils::LOG_ERROR.upcase} ] -- | #{Time.now.getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone} | #{solution.upcase} | #{message}"
           else CommonUtils::LOG_DEBUG || CommonUtils::LOG_INFO
-               puts "[ #{formatted_date}, p_id=##{Process.pid}, t_id=##{Thread.current.object_id}, #{CommonUtils::LOG_INFO.upcase} ] -- | #{Time.now.getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone} | #{solution} | #{message}"
+               puts "[ #{formatted_date}, p_id=##{Process.pid}, t_id=##{Thread.current.object_id}, #{CommonUtils::LOG_INFO.upcase} ] -- | #{Time.now.getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone} | #{solution.upcase} | #{message}"
           end
         end
 
