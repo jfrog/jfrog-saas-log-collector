@@ -1,8 +1,7 @@
 # Jfrog::Saas::Log::Collector
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/jfrog/saas/log/collector`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+JFrog Saas Log Collector gem is intended for downloading and extracting of log files generated in Artifactory or Xray on the Jfrog Cloud.
+The Log Collection feature on the cloud instance has to be [enabled](https://www.jfrog.com/confluence/display/JFROG/Artifactory+REST+API#ArtifactoryRESTAPI-EnableLogCollection) for this gem to perform the download and extract of the logs.
 
 ## Installation
 
@@ -22,22 +21,67 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Once the gem is successfully installed, use the gem to generate the sample config file,
 
-## Development
+    $ jfrog-saas-log-collector -g <full_path_of_the_config_file>
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+example
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+    $  jfrog-saas-log-collector -g /var/opt/jfrog/saas/sampleconfig.yaml
+
+The config file sample would look like this, 
+
+```yaml
+connection:
+  jpd_url: "<saas_jpd_url>"
+  end_point_base: "artifactory"
+  username: "<admin_user>"
+  access_token: "<admin_access_token>"
+  api_key: "<api_key_optional>"
+  open_timeout_in_secs: 20
+  read_timeout_in_secs: 60
+log:
+  log_ship_config: "access/api/v1/logshipping/config"
+  solutions_enabled: "artifactory, xray"
+  log_types_enabled: "access-request, router-request"
+  uri_date_pattern: "%Y-%m-%d"
+  audit_repo: "artifactory/jfrog-logs-audit"
+  log_repo: "artifactory/jfrog-logs"
+  debug_mode: false
+  target_log_path: "<path_to_extract_logs_for_artifactory>"
+  print_with_utc: false
+  log_file_retention_days: 5
+process:
+  parallel_process: 2
+  parallel_downloads: 5
+  historical_log_days: 2
+  write_logs_by_type: false
+  minutes_between_runs: 180
+
+```
+Provide all the necessary values to the tags which have angular braces like "<saas_jpd_url>" to "https://example.jfrog.io", fill in for all other segments. Do not change any other values unless the operation associated with the other tag is understood well.
+Once done, the jfrog-saas-log collector execution can be started by executing the command
+
+    $ jfrog-saas-log-collector -c <full_path_of_the_config_file>
+
+example
+
+    $  jfrog-saas-log-collector -c /var/opt/jfrog/saas/sampleconfig.yaml
+
+The gem records the progress or errors on the STDOUT / console and in a logfile (if the config provided is valid) which can be located at  <path_to_extract_logs_for_artifactory>/jfrog-saas-collector.log
+
+For all the options supported use
+
+    $ jfrog-saas-log-collector -h      OR    $ jfrog-saas-log-collector --help
+
+```shell
+Usage: jfrog-saas-log-collector [options]
+    -c, --config=CONFIG
+    -h, --help                       Prints this help
+    -g, --generate=CONFIG            Generates sample config file from template to target file provided
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/jfrog-saas-log-collector. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/jfrog-saas-log-collector/blob/master/CODE_OF_CONDUCT.md).
+Bug reports are welcome on GitHub at https://github.com/jfrog/jfrog-fluentd-plugins/issues.
 
-## License
-
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-## Code of Conduct
-
-Everyone interacting in the Jfrog::Saas::Log::Collector project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/jfrog-saas-log-collector/blob/master/CODE_OF_CONDUCT.md).
