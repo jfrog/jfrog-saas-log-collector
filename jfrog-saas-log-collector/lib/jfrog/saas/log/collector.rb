@@ -135,56 +135,68 @@ module Jfrog
             parser.banner = "Usage: jfrog-saas-log-collector [options]"
 
             parser.on("-c", "--config=CONFIG", String) do |file|
+              file = file.strip
               config_file_yaml = YAML.parse(File.open(file))
               if SchemaValidator.instance.validate(file)
                 puts "#{file} \e[32mValid YAML\e[0m"
                 config_path = file
               else
-                puts "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
-                exit
+                warn "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
+                Thread.kill main
+                exit 130
               end
             rescue StandardError
-              puts "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
-              exit
+              warn "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
+              exit 130
             end
 
             parser.on("-h", "--help", "Prints this help") do
               puts parser
-              exit
+              exit 0
             end
 
             parser.on("-g", "--generate=CONFIG", "Generates sample config file from template to target file provided") do |target_file|
               target_file = "jfrog-saas-log-collector-config.yaml" if target_file.nil?
+              target_file = target_file.strip
               template = File.open(File.join(File.dirname(__FILE__), "config.template.yaml"))
               template_data = template.read
               File.open(target_file, "w") { |file| file.write(template_data) unless template_data.nil? }
               template.close
               puts "Config file from template written successfully to #{target_file}, modify necessary values before use"
-              exit
+              exit 0
             end
           end.parse!
         rescue OptionParser::ParseError => e
-          puts "Received an\e[31m #{e} \e[0m, use -h or --help flag to list valid options, terminating jfrog-saas-log-collector operation "
-          exit 1
+          warn "Received an\e[31m #{e} \e[0m, use -h or --help flag to list valid options, terminating jfrog-saas-log-collector operation "
+          exit 130
         end
 
 
         # Terminate Main Thread Gracefully
         Signal.trap("TERM") do
-          puts "\nShutting down process #{Process.pid}, terminating jfrog-saas-log-collector operation"
+          warn "\nShutting down process p_id ##{Process.pid}, terminating jfrog-saas-log-collector operation"
           sleep 1
-          exit
+          Thread.list.each do |thread|
+            warn "Terminating thread t_id - ##{thread.object_id}"
+            Thread.kill thread
+          end
+          exit 130
         end
 
         Signal.trap("INT") do
-          puts "\nShutting down process #{Process.pid}, terminating jfrog-saas-log-collector operation"
+          warn "\nShutting down process ##{Process.pid}, terminating jfrog-saas-log-collector operation"
           sleep 1
-          exit
+          Thread.list.each do |thread|
+            warn "Terminating thread t_id - ##{thread.object_id}"
+            Thread.kill thread
+          end
+          exit 130
         end
 
         # Run the program
         if config_path.nil?
-          puts "\nNo config file provided, use -c option for config file path or provide the path in LOG_COLLECTOR_CONFIG environment variable, shutting down process #{Process.pid}, terminating jfrog-saas-log-collector operation"
+          warn "\nNo config file provided, use -c option for config file path or provide the path in LOG_COLLECTOR_CONFIG environment variable, shutting down process #{Process.pid}, terminating jfrog-saas-log-collector operation"
+          raise SignalException "INT"
         else
           Processor.new(config_path).execute_in_timer
         end
