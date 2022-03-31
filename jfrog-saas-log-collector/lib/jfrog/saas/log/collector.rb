@@ -99,9 +99,9 @@ module Jfrog
 
         def execute_in_timer
           scheduler = Rufus::Scheduler.new
-          scheduler.every "#{ConfigHandler.instance.proc_config.minutes_between_runs}m", first_in: 1 do
+          scheduler.every "#{ConfigHandler.instance.proc_config.minutes_between_runs}m", first_in: 1 do |job|
             execute
-            next_execution_time = "#{(Time.now + (ConfigHandler.instance.proc_config.minutes_between_runs * 60)).getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone}"
+            next_execution_time = job.next_time.to_s
             MessageUtils.instance.log_message(MessageUtils::SCHEDULER_NEXT_RUN, { "param1": next_execution_time,
                                                                                   "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
                                                                                   "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_NEXT_RUN })
@@ -117,7 +117,10 @@ module Jfrog
                                                                                   "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
             Thread.kill thread
           end
-          exit 130
+          next_execution_time = (Time.now + (ConfigHandler.instance.proc_config.minutes_between_runs * 60)).strftime("%Y-%m-%d %H:%M").to_s
+          MessageUtils.instance.log_message(MessageUtils::SCHEDULER_NEXT_RUN, { "param1": next_execution_time,
+                                                                                "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_NEXT_RUN })
         end
       end
 
@@ -183,7 +186,7 @@ module Jfrog
               template.close
               MessageUtils.instance.put_message(MessageUtils::CONFIG_TEMPLATE_SUCCESSFULLY_WRITTEN, { "param1": target_file.to_s,
                                                                                                       "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
-                                                                                                      "#{MessageUtils::SOLUTION}": "INIT" })
+                                                                                                      "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_INIT })
               exit 0
             end
           end.parse!
