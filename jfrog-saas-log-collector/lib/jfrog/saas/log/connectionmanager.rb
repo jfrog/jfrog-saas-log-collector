@@ -28,7 +28,7 @@ module Jfrog
                                        interval: 0.05,
                                        interval_randomness: 0.5,
                                        backoff_factor: 2,
-                                       exceptions: [Errno::ETIMEDOUT, "Timeout::Error", Faraday::TimeoutError, Faraday::RetriableResponse])
+                                       exceptions: [Errno::ETIMEDOUT, Timeout::Error, Faraday::TimeoutError, Faraday::RetriableResponse])
             connection.request :gzip if gzip_support == true
           end
         end
@@ -62,7 +62,7 @@ module Jfrog
           response
         rescue Faraday::SSLError, Faraday::ServerError, Faraday::ConnectionFailed => e
           MessageUtils.instance.log_message(MessageUtils::CONNECTION_ERROR, { "param1": ConfigHandler.instance.conn_config.jpd_url, "param2":e.message, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR } )
-          MessageUtils.instance.log_message(MessageUtils::ERROR_BACKTRACE, { "param1": e.backtrace, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR } )
+          MessageUtils.instance.log_message(MessageUtils::ERROR_BACKTRACE, { "param1": e.backtrace, "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG } ) if ConfigHandler.instance.log_config.debug_mode == true
         end
 
       end

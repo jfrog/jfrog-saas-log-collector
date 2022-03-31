@@ -107,6 +107,17 @@ module Jfrog
                                                                                   "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_NEXT_RUN })
           end
           scheduler.join
+        rescue Errno::ETIMEDOUT, Timeout::Error, Faraday::TimeoutError, Faraday::SSLError, Faraday::ServerError, Faraday::ConnectionFailed => e
+          MessageUtils.instance.log_message(MessageUtils::SHUT_DOWN_PROCESS, { "param1": "#{Process.pid.to_s} [Reason -> #{e}]",
+                                                                               "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                               "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
+          Thread.list.each do |thread|
+            MessageUtils.instance.log_message(MessageUtils::TERMINATING_THREAD, { "param1": thread.object_id.to_s,
+                                                                                  "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                  "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
+            Thread.kill thread
+          end
+          exit 130
         end
       end
 
