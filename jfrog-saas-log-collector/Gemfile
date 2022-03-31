@@ -26,3 +26,5 @@ gem "parallel"
 gem "logger"
 
 gem "rufus-scheduler"
+
+gem "json-schema"

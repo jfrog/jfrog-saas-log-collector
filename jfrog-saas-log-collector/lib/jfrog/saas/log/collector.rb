@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+require 'English'
 require "rufus/scheduler"
 require "parallel"
+require "json"
+require "json-schema"
 
 require_relative "collector/version"
 require_relative "confighandler"
@@ -107,15 +110,38 @@ module Jfrog
         end
       end
 
+      class SchemaValidator
+        include Singleton
+        def validate(config_file)
+          config_valid = false
+          config_file_yaml = YAML.load_file(config_file)
+          config_in_json = config_file_yaml.to_json
+          config_schema_file = File.open((File.join(File.dirname(__FILE__), "config.template.schema.json")))
+          config_schema = JSON.parse(config_schema_file.read)
+          begin
+            JSON::Validator.validate!(config_schema, config_in_json)
+            config_valid = true
+          rescue JSON::Schema::ValidationError
+            puts "Config File Validation failed, reason -> #{$ERROR_INFO.message}"
+          end
+          config_valid
+        end
+      end
+
       module Collector
         config_path = nil
         OptionParser.new do |parser|
           parser.banner = "Usage: jfrog-saas-log-collector [options]"
 
           parser.on("-c", "--config=CONFIG", String) do |file|
-            YAML.parse(File.open(file))
-            puts "#{file} \e[32mValid YAML\e[0m"
-            config_path = file
+            config_file_yaml = YAML.parse(File.open(file))
+            if SchemaValidator.instance.validate(file)
+              puts "#{file} \e[32mValid YAML\e[0m"
+              config_path = file
+            else
+              puts "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
+              exit
+            end
           rescue StandardError
             puts "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
             exit
