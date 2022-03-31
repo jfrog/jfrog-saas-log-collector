@@ -60,6 +60,16 @@ module Jfrog
         PURGE_RETAIN_DAYS_FOR_FILE = "File %<param1>s has time of %<param2>s days to be retained"
         PURGE_SUCCESS_FOR_FILE = "File %<param1>s purged successfully"
 
+        CONFIG_FILE_VALIDATION_FAILED_DETAILS = "Config File Validation failed, reason -> %<param1>s"
+        CONFIG_FILE_PROVIDED_IS_NOT_VALID = "Config file provided %<param1>s is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
+        CONFIG_TEMPLATE_SUCCESSFULLY_WRITTEN = "Config file from template written successfully to %<param1>s, modify necessary values before use"
+        NO_CONFIG_FILE_PROVIDED = "No config file provided, use -c option for config file path or provide the path in LOG_COLLECTOR_CONFIG environment variable, shutting down process %<param1>s, terminating jfrog-saas-log-collector operation"
+        VALID_CONFIG_FILE_PROVIDED = "Config file provided %<param1>s is a \e[32mValid YAML\e[0m file, starting jfrog-saas-log-collector configuration"
+        RECEIVED_AN_INVALID_OPTION_FLAG = "Received an\e[31m %<param1>s \e[0m, use -h or --help flag to list valid options, terminating jfrog-saas-log-collector operation "
+
+        SHUT_DOWN_PROCESS = "Shutting down process p_id #%<param1>s, terminating jfrog-saas-log-collector operation"
+        TERMINATING_THREAD = "Terminating thread t_id - #%<param1>s"
+
         # LOGGING RELATED SEGMENT - BEGIN
 
         def handle_log(solution, message, log_level)
@@ -86,11 +96,28 @@ module Jfrog
           end
         end
 
+        def handle_put(solution, message, log_level)
+          formatted_date = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+          case log_level
+          when CommonUtils::LOG_ERROR || CommonUtils::LOG_WARN
+            warn "[ #{formatted_date}, p_id=##{Process.pid}, t_id=##{Thread.current.object_id}, #{CommonUtils::LOG_ERROR.upcase} ] -- | #{Time.now.getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone} | #{solution} | #{message}"
+          else CommonUtils::LOG_DEBUG || CommonUtils::LOG_INFO
+               puts "[ #{formatted_date}, p_id=##{Process.pid}, t_id=##{Thread.current.object_id}, #{CommonUtils::LOG_INFO.upcase} ] -- | #{Time.now.getutc.strftime("%Y-%m-%d %H:%M:%S.%3N ")}#{Time.now.getutc.zone} | #{solution} | #{message}"
+          end
+        end
+
         # LOGGING RELATED SEGMENT - END
         def log_message(message, substitutions)
           temp_message = message.dup
           temp_message = temp_message % substitutions
           handle_log(substitutions[MessageUtils::SOLUTION.to_sym], temp_message, substitutions[MessageUtils::LOG_LEVEL.to_sym])
+        end
+
+        # LOGGING RELATED SEGMENT - END
+        def put_message(message, substitutions)
+          temp_message = message.dup
+          temp_message = temp_message % substitutions
+          handle_put(substitutions[MessageUtils::SOLUTION.to_sym], temp_message, substitutions[MessageUtils::LOG_LEVEL.to_sym])
         end
       end
     end

@@ -122,7 +122,9 @@ module Jfrog
             JSON::Validator.validate!(config_schema, config_in_json)
             config_valid = true
           rescue JSON::Schema::ValidationError
-            puts "Config File Validation failed, reason -> #{$ERROR_INFO.message}"
+            MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_VALIDATION_FAILED_DETAILS, { "param1": $ERROR_INFO.message,
+                                                                                                     "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                     "#{MessageUtils::SOLUTION}": "TERMINATE" })
           end
           config_valid
         end
@@ -138,15 +140,21 @@ module Jfrog
               file = file.strip
               config_file_yaml = YAML.parse(File.open(file))
               if SchemaValidator.instance.validate(file)
-                puts "#{file} \e[32mValid YAML\e[0m"
+                MessageUtils.instance.put_message(MessageUtils::VALID_CONFIG_FILE_PROVIDED, { "param1": file.to_s,
+                                                                                                     "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                                     "#{MessageUtils::SOLUTION}": "INIT" })
                 config_path = file
               else
-                warn "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
+                MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_PROVIDED_IS_NOT_VALID, { "param1": file.to_s,
+                                                                                                     "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                     "#{MessageUtils::SOLUTION}": "TERMINATE" })
                 Thread.kill main
                 exit 130
               end
             rescue StandardError
-              warn "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
+              MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_PROVIDED_IS_NOT_VALID, { "param1": file.to_s,
+                                                                                                   "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                   "#{MessageUtils::SOLUTION}": "TERMINATE" })
               exit 130
             end
 
@@ -162,19 +170,25 @@ module Jfrog
               template_data = template.read
               File.open(target_file, "w") { |file| file.write(template_data) unless template_data.nil? }
               template.close
-              puts "Config file from template written successfully to #{target_file}, modify necessary values before use"
+              MessageUtils.instance.put_message(MessageUtils::CONFIG_TEMPLATE_SUCCESSFULLY_WRITTEN, { "param1": target_file.to_s,
+                                                                                                      "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                                      "#{MessageUtils::SOLUTION}": "INIT" })
               exit 0
             end
           end.parse!
         rescue OptionParser::ParseError => e
-          warn "Received an\e[31m #{e} \e[0m, use -h or --help flag to list valid options, terminating jfrog-saas-log-collector operation "
+          MessageUtils.instance.put_message(MessageUtils::RECEIVED_AN_INVALID_OPTION_FLAG, { "param1": e.to_s,
+                                                                                             "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                             "#{MessageUtils::SOLUTION}": "TERMINATE" })
           exit 130
         end
 
 
         # Terminate Main Thread Gracefully
         Signal.trap("TERM") do
-          warn "\nShutting down process p_id ##{Process.pid}, terminating jfrog-saas-log-collector operation"
+          MessageUtils.instance.put_message(MessageUtils::SHUT_DOWN_PROCESS, { "param1": Process.pid.to_s,
+                                                                               "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                               "#{MessageUtils::SOLUTION}": "TERMINATE" })
           sleep 1
           Thread.list.each do |thread|
             warn "Terminating thread t_id - ##{thread.object_id}"
@@ -184,10 +198,14 @@ module Jfrog
         end
 
         Signal.trap("INT") do
-          warn "\nShutting down process ##{Process.pid}, terminating jfrog-saas-log-collector operation"
+          MessageUtils.instance.put_message(MessageUtils::SHUT_DOWN_PROCESS, { "param1": Process.pid.to_s,
+                                                                               "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                               "#{MessageUtils::SOLUTION}": "TERMINATE" })
           sleep 1
           Thread.list.each do |thread|
-            warn "Terminating thread t_id - ##{thread.object_id}"
+            MessageUtils.instance.put_message(MessageUtils::TERMINATING_THREAD, { "param1": thread.object_id.to_s,
+                                                                                  "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                  "#{MessageUtils::SOLUTION}": "TERMINATE" })
             Thread.kill thread
           end
           exit 130
@@ -195,8 +213,16 @@ module Jfrog
 
         # Run the program
         if config_path.nil?
-          warn "\nNo config file provided, use -c option for config file path or provide the path in LOG_COLLECTOR_CONFIG environment variable, shutting down process #{Process.pid}, terminating jfrog-saas-log-collector operation"
-          raise SignalException "INT"
+          MessageUtils.instance.put_message(MessageUtils::NO_CONFIG_FILE_PROVIDED, { "param1": Process.pid.to_s,
+                                                                                     "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                     "#{MessageUtils::SOLUTION}": "TERMINATE" })
+          Thread.list.each do |thread|
+            MessageUtils.instance.put_message(MessageUtils::TERMINATING_THREAD, { "param1": thread.object_id.to_s,
+                                                                                  "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                  "#{MessageUtils::SOLUTION}": "TERMINATE" })
+            Thread.kill thread
+          end
+          exit 130
         else
           Processor.new(config_path).execute_in_timer
         end
