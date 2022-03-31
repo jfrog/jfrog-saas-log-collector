@@ -130,38 +130,44 @@ module Jfrog
 
       module Collector
         config_path = nil
-        OptionParser.new do |parser|
-          parser.banner = "Usage: jfrog-saas-log-collector [options]"
+        begin
+          OptionParser.new do |parser|
+            parser.banner = "Usage: jfrog-saas-log-collector [options]"
 
-          parser.on("-c", "--config=CONFIG", String) do |file|
-            config_file_yaml = YAML.parse(File.open(file))
-            if SchemaValidator.instance.validate(file)
-              puts "#{file} \e[32mValid YAML\e[0m"
-              config_path = file
-            else
+            parser.on("-c", "--config=CONFIG", String) do |file|
+              config_file_yaml = YAML.parse(File.open(file))
+              if SchemaValidator.instance.validate(file)
+                puts "#{file} \e[32mValid YAML\e[0m"
+                config_path = file
+              else
+                puts "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
+                exit
+              end
+            rescue StandardError
               puts "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
               exit
             end
-          rescue StandardError
-            puts "Config file provided #{file} is an \e[31mInvalid YAML file\e[0m, terminating jfrog-saas-log-collector operation "
-            exit
-          end
 
-          parser.on("-h", "--help", "Prints this help") do
-            puts parser
-            exit
-          end
+            parser.on("-h", "--help", "Prints this help") do
+              puts parser
+              exit
+            end
 
-          parser.on("-g", "--generate=CONFIG", "Generates sample config file from template to target file provided") do |target_file|
-            target_file = "jfrog-saas-log-collector-config.yaml" if target_file.nil?
-            template = File.open(File.join(File.dirname(__FILE__), "config.template.yaml"))
-            template_data = template.read
-            File.open(target_file, "w") { |file| file.write(template_data) unless template_data.nil? }
-            template.close
-            puts "Config file from template written successfully to #{target_file}, modify necessary values before use"
-            exit
-          end
-        end.parse!
+            parser.on("-g", "--generate=CONFIG", "Generates sample config file from template to target file provided") do |target_file|
+              target_file = "jfrog-saas-log-collector-config.yaml" if target_file.nil?
+              template = File.open(File.join(File.dirname(__FILE__), "config.template.yaml"))
+              template_data = template.read
+              File.open(target_file, "w") { |file| file.write(template_data) unless template_data.nil? }
+              template.close
+              puts "Config file from template written successfully to #{target_file}, modify necessary values before use"
+              exit
+            end
+          end.parse!
+        rescue OptionParser::ParseError => e
+          puts "Received an\e[31m #{e} \e[0m, use -h or --help flag to list valid options, terminating jfrog-saas-log-collector operation "
+          exit 1
+        end
+
 
         # Terminate Main Thread Gracefully
         Signal.trap("TERM") do
