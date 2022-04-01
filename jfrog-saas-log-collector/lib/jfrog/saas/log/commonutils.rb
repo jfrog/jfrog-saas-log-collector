@@ -65,7 +65,7 @@ module Jfrog
         end
 
         def audit_repo_create_url
-          "/#{ConfigHandler.instance.conn_config.end_point_base}/api/repositories/#{((audit_repo_url).split("/"))[1]}"
+          "#{ConfigHandler.instance.conn_config.end_point_base}/api/repositories/#{((audit_repo_url).split("/"))[1]}"
         end
 
         def audit_repo_create_body
@@ -99,7 +99,7 @@ module Jfrog
 
         def audit_repo_create_tgt_dir_body(target_dir_string)
           "{
-            \"uri\": \"#{audit_repo_target_dir_url(target_dir_string, false, true, true)}\",
+            \"uri\": \"#{audit_repo_target_dir_url(target_dir_string, false, true, false)}\",
             \"repo\": \"#{audit_repo_target_dir_url(target_dir_string, true, false, false)}\",
             \"path\" : \"#{audit_repo_target_dir_url(target_dir_string, false, false, false)}\",
             \"created\": \"#{DateTime.now.iso8601}\",
@@ -165,8 +165,9 @@ module Jfrog
         def check_if_resource_exists(solution, relative_url)
           resource_exists = false
           conn_mgr = ConnectionManager.new
-          headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_TEXT }
+          headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_JSON }
           response = conn_mgr.execute(relative_url, nil, headers, nil, CommonUtils::HTTP_GET, true)
+          puts "Resource Check Status - #{response.status}"
           if !response.nil? && response.status >= 200 && response.status < 300
             resource_exists = true
             MessageUtils.instance.log_message(MessageUtils::RESOURCE_CHECK_SUCCESS, { "param1": "#{ConfigHandler.instance.conn_config.jpd_url}/#{relative_url}",
@@ -202,11 +203,11 @@ module Jfrog
         end
 
         def check_and_create_audit_repo
-          audit_log_repo_exists = check_if_resource_exists(nil, CommonUtils.instance.audit_repo_url)
+          audit_log_repo_exists = check_if_resource_exists(nil, audit_repo_create_url)
           unless audit_log_repo_exists
             conn_mgr = ConnectionManager.new
             headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_JSON }
-            body = audit_repo_create_url
+            body = audit_repo_create_body
             if ConfigHandler.instance.log_config.debug_mode
               MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_CHECK_CALL_DETAIL, { "param1": audit_repo_create_url.to_s,
                                                                                               "param2": headers.to_s,
@@ -237,6 +238,7 @@ module Jfrog
           unless audit_log_repo_tgt_dir_exists
             conn_mgr = ConnectionManager.new
             headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_JSON }
+            body = audit_repo_create_tgt_dir_body(tgt_dir_str)
             if ConfigHandler.instance.log_config.debug_mode
               MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_TGT_DIR_CHECK_CALL_DETAIL, { "param1": "#{audit_repo_target_dir_url(tgt_dir_str, false, true, true)}",
                                                                                                       "param2": headers.to_s,
@@ -244,7 +246,7 @@ module Jfrog
                                                                                                       "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG,
                                                                                                       "#{MessageUtils::SOLUTION}": solution })
             end
-            response = conn_mgr.execute(audit_repo_target_dir_url(tgt_dir_str, false, false, true), nil, headers, audit_repo_create_tgt_dir_body(tgt_dir_str), CommonUtils::HTTP_PUT, true)
+            response = conn_mgr.execute(audit_repo_target_dir_url(tgt_dir_str, false, false, true), nil, headers, body, CommonUtils::HTTP_PUT, true)
             if !response.nil? && (response.status >= 200 && response.status < 300)
               MessageUtils.instance.log_message(MessageUtils::AUDIT_REPO_TGT_DIR_CREATION_SUCCESS, { "param1": "#{audit_repo_target_dir_url(tgt_dir_str, false, true, false)}",
                                                                                                      "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
@@ -296,7 +298,7 @@ module Jfrog
             if total_records.positive?
               results = parsed_json["results"]
               MessageUtils.instance.log_message(MessageUtils::DATE_VS_PROCESSED_LOGS_DATA, { "param1": date_in_string.to_s,
-                                                                                             "param2": results.to_s,
+                                                                                             "param2": JSON.pretty_generate(results),
                                                                                              "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
                                                                                              "#{MessageUtils::SOLUTION}": solution })
               results.each do |log_file_detail|
@@ -325,7 +327,7 @@ module Jfrog
             if total_records.positive?
               results = parsed_json["results"]
               MessageUtils.instance.log_message(MessageUtils::DATE_VS_LOGS_DATA, { "param1": date_in_string.to_s,
-                                                                                   "param2": results.to_s,
+                                                                                   "param2": JSON.pretty_generate(results),
                                                                                    "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
                                                                                    "#{MessageUtils::SOLUTION}": solution })
               results.each do |log_file_detail|

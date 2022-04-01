@@ -21,7 +21,6 @@ module Jfrog
             connection.adapter Faraday::Adapter::NetHttp
             connection.use Faraday::Request::UrlEncoded
             connection.use Faraday::FollowRedirects::Middleware
-            connection.use Faraday::Response::Logger if ConfigHandler.instance.log_config.debug_mode == true
             connection.options.open_timeout = ConfigHandler.instance.conn_config.open_timeout_in_secs
             connection.options.read_timeout = ConfigHandler.instance.conn_config.read_timeout_in_secs
             connection.request(:retry, max: 3,
@@ -30,6 +29,11 @@ module Jfrog
                                        backoff_factor: 2,
                                        exceptions: [Errno::ETIMEDOUT, Timeout::Error, Faraday::TimeoutError, Faraday::RetriableResponse])
             connection.request :gzip if gzip_support == true
+            if ConfigHandler.instance.log_config.debug_mode == true
+              connection.use Faraday::Response::Logger do |logger|
+                logger.filter(/(Authorization)([^&]+)/, '\1 [REMOVED WHILE LOGGING]')
+              end
+            end
           end
         end
 

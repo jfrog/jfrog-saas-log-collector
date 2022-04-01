@@ -39,19 +39,11 @@ module Jfrog
             file_map = logs_map[date_detail]
             file_map&.each do |file_name, file_details|
               url = "#{ConfigHandler.instance.conn_config.end_point_base}/#{file_details["repo"]}/#{file_details["path"]}/#{file_details["name"]}"
-              target_audit_repo_dir = "#{mapped_solution}/#{mapped_date}"
-              target_audit_repo_exists = CommonUtils.instance.check_create_tgt_dir(solution, target_audit_repo_dir)
-              if target_audit_repo_exists
-                MessageUtils.instance.log_message(MessageUtils::FILE_DOWNLOAD_URL_AND_SIZE, { "param1": url.to_s,
-                                                                                              "param2": CommonUtils.instance.get_size_in_mb(file_details["size"].to_i, true).to_s,
-                                                                                              "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
-                                                                                              "#{MessageUtils::SOLUTION}": solution })
-                CommonUtils.instance.download_and_extract_log(solution, mapped_date, ConfigHandler.instance.log_config.target_log_path, file_name, url)
-              else
-                MessageUtils.instance.log_message(MessageUtils::AUDIT_FILE_CREATION_FAILED, { "param1": "#{audit_repo_target_dir_url("#{mapped_solution}/#{mapped_date}", false, true, false)}/#{file_name}",
-                                                                                              "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                              "#{MessageUtils::SOLUTION}": solution })
-              end
+              MessageUtils.instance.log_message(MessageUtils::FILE_DOWNLOAD_URL_AND_SIZE, { "param1": url.to_s,
+                                                                                            "param2": CommonUtils.instance.get_size_in_mb(file_details["size"].to_i, true).to_s,
+                                                                                            "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                            "#{MessageUtils::SOLUTION}": solution })
+              CommonUtils.instance.download_and_extract_log(solution, mapped_date, ConfigHandler.instance.log_config.target_log_path, file_name, url)
             end
           end
         end

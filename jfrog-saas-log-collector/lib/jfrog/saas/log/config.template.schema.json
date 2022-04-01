@@ -31,10 +31,7 @@
         "jpd_url",
         "end_point_base",
         "username",
-        "access_token",
-        "api_key",
-        "open_timeout_in_secs",
-        "read_timeout_in_secs"
+        "access_token"
       ]
     },
     "log": {
@@ -78,10 +75,7 @@
         "uri_date_pattern",
         "audit_repo",
         "log_repo",
-        "debug_mode",
-        "target_log_path",
-        "print_with_utc",
-        "log_file_retention_days"
+        "target_log_path"
       ]
     },
     "process": {
@@ -104,11 +98,7 @@
         }
       },
       "required": [
-        "parallel_process",
-        "parallel_downloads",
-        "historical_log_days",
-        "write_logs_by_type",
-        "minutes_between_runs"
+        "write_logs_by_type"
       ]
     }
   },
