@@ -17,9 +17,6 @@
         "access_token": {
           "type": "string"
         },
-        "api_key": {
-          "type": "string"
-        },
         "open_timeout_in_secs": {
           "type": "integer"
         },
@@ -41,10 +38,26 @@
           "type": "string"
         },
         "solutions_enabled": {
-          "type": "string"
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
         },
         "log_types_enabled": {
-          "type": "string"
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
         },
         "uri_date_pattern": {
           "type": "string"
