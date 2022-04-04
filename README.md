@@ -55,13 +55,12 @@ connection:
   end_point_base: "artifactory"
   username: "<admin_user>"
   access_token: "<admin_access_token>"
-  api_key: "<api_key_optional>"
   open_timeout_in_secs: 20
   read_timeout_in_secs: 60
 log:
   log_ship_config: "access/api/v1/logshipping/config"
-  solutions_enabled: "artifactory, xray"
-  log_types_enabled: "access-request, router-request"
+  solutions_enabled: ["artifactory", "xray"]
+  log_types_enabled: ["access-request", "router-request"]
   uri_date_pattern: "%Y-%m-%d"
   audit_repo: "artifactory/jfrog-logs-audit"
   log_repo: "artifactory/jfrog-logs"
@@ -75,7 +74,6 @@ process:
   historical_log_days: 2
   write_logs_by_type: false
   minutes_between_runs: 180
-
 ```
 Provide all the necessary values to the tags which have angular braces like "<saas_jpd_url>" to "https://example.jfrog.io", fill in for all other segments. Do not change any other values unless the operation associated with the other tag is understood well.
 Once done, the jfrog-saas-log collector execution can be started by executing the command

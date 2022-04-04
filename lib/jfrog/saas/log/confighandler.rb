@@ -81,8 +81,8 @@ module Jfrog
           end
 
           self.log_ship_config = (config['log']['log_ship_config'])
-          self.solutions_enabled = config['log']['solutions_enabled'].split(',').map(&:strip)
-          self.log_types_enabled = config['log']['log_types_enabled'].split(',').map(&:strip)
+          self.solutions_enabled = config['log']['solutions_enabled'].map(&:strip)
+          self.log_types_enabled = config['log']['log_types_enabled'].map(&:strip)
           self.uri_date_pattern = (config['log']['uri_date_pattern']).to_s
           self.audit_repo_url = (config['log']['audit_repo']).to_s.strip
           self.log_repo_url = (config['log']['log_repo']).to_s.strip
