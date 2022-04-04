@@ -14,11 +14,11 @@ Gem::Specification.new do |spec|
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.7.0'
 
-  spec.metadata['allowed_push_host'] = "Set to your gem server 'https://example.com'"
+  spec.metadata['allowed_push_host'] = "Set to your gem server 'https://rubygems.org'"
 
-  spec.metadata['homepage_uri'] = 'https://www.trials.com'
-  spec.metadata['source_code_uri'] = 'https://www.trials.com'
-  spec.metadata['changelog_uri'] = 'https://www.trials.com'
+  spec.metadata['homepage_uri'] = 'https://github.com/jfrog/jfrog-saas-log-collector/wiki'
+  spec.metadata['source_code_uri'] = 'https://github.com/jfrog/jfrog-saas-log-collector'
+  spec.metadata['changelog_uri'] = 'https://github.com/jfrog/jfrog-saas-log-collector/commits/main'
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
