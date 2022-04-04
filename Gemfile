@@ -2,7 +2,6 @@
 
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in jfrog-saas-log-collector.gemspec
 gemspec
 
 gem 'rake', '~> 13.0'
@@ -13,20 +12,20 @@ gem 'rubocop', '~> 1.21'
 
 gem 'faraday', '~> 2.2.0'
 
-gem 'faraday-follow_redirects'
+gem 'faraday-follow_redirects', '~> 0.2.0'
 
-gem 'faraday-gzip'
+gem 'faraday-gzip', '~> 0.1.0'
 
-gem 'faraday-retry'
+gem 'faraday-retry', '~> 1.0.3'
 
-gem 'zlib'
+gem 'zlib', '~> 2.1.1'
 
-gem 'parallel'
+gem 'parallel', '~> 1.21.0'
 
-gem 'logger'
+gem 'logger', '~> 1.5.0'
 
-gem 'rufus-scheduler'
+gem 'rufus-scheduler', '~> 3.8.1'
 
-gem 'json-schema'
+gem 'json-schema', '~> 2.8.1'
 
-gem 'addressable'
+gem 'addressable', '~> 2.8.0'

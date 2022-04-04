@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.authors = ['Vasuki Narayana']
   spec.email = ['vasukin@jfrog.com']
 
-  spec.summary = 'Write a short summary, because RubyGems requires one.'
-  spec.description = 'Write a longer description or delete this line.'
-  spec.homepage = 'https://www.trials.com'
+  spec.summary = 'JFrog Saas Log Collector gem is intended for downloading and extracting of log files generated in Artifactory or Xray on the Jfrog Cloud.'
+  spec.description = 'JFrog Saas Log Collector gem is intended for downloading and extracting of log files generated in Artifactory or Xray on the Jfrog Cloud.'
+  spec.homepage = 'https://github.com/jfrog/jfrog-saas-log-collector/wiki'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.7.0'
 
@@ -20,8 +20,6 @@ Gem::Specification.new do |spec|
   spec.metadata['source_code_uri'] = 'https://github.com/jfrog/jfrog-saas-log-collector'
   spec.metadata['changelog_uri'] = 'https://github.com/jfrog/jfrog-saas-log-collector/commits/main'
 
-  # Specify which files should be added to the gem when it is released.
-  # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
       (f == __FILE__) || f.match(%r{\A(?:(?:test|spec|features)/|\.(?:git|travis|circleci)|appveyor)})
@@ -31,9 +29,30 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
-  # Uncomment to register a new dependency of your gem
-  # spec.add_dependency "example-gem", "~> 1.0"
+  spec.add_dependency 'rake', '~> 13.0'
 
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
+  spec.add_dependency 'minitest', '~> 5.0'
+
+  spec.add_dependency 'rubocop', '~> 1.21'
+
+  spec.add_dependency 'faraday', '~> 2.2.0'
+
+  spec.add_dependency 'faraday-follow_redirects', '~> 0.2.0'
+
+  spec.add_dependency 'faraday-gzip', '~> 0.1.0'
+
+  spec.add_dependency 'faraday-retry', '~> 1.0.3'
+
+  spec.add_dependency 'zlib', '~> 2.1.1'
+
+  spec.add_dependency 'parallel', '~> 1.21.0'
+
+  spec.add_dependency 'logger', '~> 1.5.0'
+
+  spec.add_dependency 'rufus-scheduler', '~> 3.8.1'
+
+  spec.add_dependency 'json-schema', '~> 2.8.1'
+
+  spec.add_dependency 'addressable', '~> 2.8.0'
+
 end
