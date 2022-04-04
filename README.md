@@ -5,7 +5,29 @@ The Log Collection feature on the cloud instance has to be [enabled](https://www
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Prerequisite: 
+
+For Gem based install, Ruby Interpreter has to be setup first, following is the recommended process to install Ruby
+
+```text
+
+1. Install Ruby Version Manager (RVM) as described in https://rvm.io/rvm/install#installation-explained, ensure to follow all the onscreen instructions provided to complete the rvm installation
+	* For installation across users a SUDO based install is recommended, the installation is as described in https://rvm.io/support/troubleshooting#sudo
+
+2. Once rvm installation is complete, verify the RVM installation executing the command 'rvm -v'
+
+3. Now install ruby v2.7.0 or above executing the command 'rvm install <ver_num>', ex: 'rvm install 2.7.5'
+
+4. Verify the ruby installation, execute 'ruby -v', gem installation 'gem -v' and 'bundler -v' to ensure all the components are intact
+
+5. Post completion of Ruby, Gems installation, the environment is ready to further install new gems, execute the following gem install commands one after other to setup the needed ecosystem
+
+```
+Install it:
+
+    $ gem install jfrog-saas-log-collector
+
+Or add this line to your application's Gemfile:
 
 ```ruby
 gem 'jfrog-saas-log-collector'
@@ -14,10 +36,6 @@ gem 'jfrog-saas-log-collector'
 And then execute:
 
     $ bundle install
-
-Or install it yourself as:
-
-    $ gem install jfrog-saas-log-collector
 
 ## Usage
 
