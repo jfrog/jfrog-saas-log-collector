@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require "optparse"
-require "yaml"
-require "singleton"
-require "fileutils"
+require 'optparse'
+require 'yaml'
+require 'singleton'
+require 'fileutils'
 
-require_relative "commonutils"
-require_relative "constants"
+require_relative 'commonutils'
+require_relative 'constants'
 
 module Jfrog
   module Saas
@@ -68,28 +68,28 @@ module Jfrog
 
         def configure(config_file)
           config = YAML.load_file(config_file)
-          self.target_log_path = (config["log"]["target_log_path"]).to_s.strip
+          self.target_log_path = (config['log']['target_log_path']).to_s.strip
           log_file = "#{target_log_path}/jfrog-saas-collector.log"
           FileUtils.mkdir_p(target_log_path) unless File.directory? target_log_path
           FileUtils.touch(log_file) unless File.exist? log_file
-          self.logger = Logger.new(log_file, "weekly")
+          self.logger = Logger.new(log_file, 'weekly')
           self.console_logger = Logger.new($stdout)
 
           console_logger.formatter = logger.formatter = proc do |severity, datetime, progname, msg|
-            formatted_date = datetime.strftime("%Y-%m-%d %H:%M:%S")
+            formatted_date = datetime.strftime('%Y-%m-%d %H:%M:%S')
             "[ #{formatted_date}, p_id=##{Process.pid}, t_id=##{Thread.current.object_id}, #{severity.ljust(5)}] -- #{msg} \n"
           end
 
-          self.log_ship_config = (config["log"]["log_ship_config"])
-          self.solutions_enabled = config["log"]["solutions_enabled"].split(",").map(&:strip)
-          self.log_types_enabled = config["log"]["log_types_enabled"].split(",").map(&:strip)
-          self.uri_date_pattern = (config["log"]["uri_date_pattern"]).to_s
-          self.audit_repo_url = (config["log"]["audit_repo"]).to_s.strip
-          self.log_repo_url = (config["log"]["log_repo"]).to_s.strip
-          self.debug_mode = (config["log"]["debug_mode"])
-          self.print_with_utc = (config["log"]["print_with_utc"])
-          self.log_file_retention_days = if (config["log"]["log_file_retention_days"]).to_i.positive?
-                                           (config["log"]["log_file_retention_days"]).to_i
+          self.log_ship_config = (config['log']['log_ship_config'])
+          self.solutions_enabled = config['log']['solutions_enabled'].split(',').map(&:strip)
+          self.log_types_enabled = config['log']['log_types_enabled'].split(',').map(&:strip)
+          self.uri_date_pattern = (config['log']['uri_date_pattern']).to_s
+          self.audit_repo_url = (config['log']['audit_repo']).to_s.strip
+          self.log_repo_url = (config['log']['log_repo']).to_s.strip
+          self.debug_mode = (config['log']['debug_mode'])
+          self.print_with_utc = (config['log']['print_with_utc'])
+          self.log_file_retention_days = if (config['log']['log_file_retention_days']).to_i.positive?
+                                           (config['log']['log_file_retention_days']).to_i
                                          else
                                            7
                                          end
@@ -141,21 +141,21 @@ module Jfrog
 
         def configure(config_file)
           config = YAML.load_file(config_file)
-          self.jpd_url = (config["connection"]["jpd_url"]).to_s.strip
-          self.username = (config["connection"]["username"]).to_s.strip
-          self.access_token = (config["connection"]["access_token"]).to_s.strip
-          self.end_point_base = (config["connection"]["end_point_base"]).to_s.strip
-          self.api_key = (config["connection"]["api_key"]).to_s.strip
-          self.ignore_errors_in_response = (config["connection"]["ignore_errors_in_response"])
+          self.jpd_url = (config['connection']['jpd_url']).to_s.strip
+          self.username = (config['connection']['username']).to_s.strip
+          self.access_token = (config['connection']['access_token']).to_s.strip
+          self.end_point_base = (config['connection']['end_point_base']).to_s.strip
+          self.api_key = (config['connection']['api_key']).to_s.strip
+          self.ignore_errors_in_response = (config['connection']['ignore_errors_in_response'])
 
-          self.open_timeout_in_secs = if config["connection"]["open_timeout_in_secs"].to_i.positive?
-                                        config["connection"]["open_timeout_in_secs"].to_i
+          self.open_timeout_in_secs = if config['connection']['open_timeout_in_secs'].to_i.positive?
+                                        config['connection']['open_timeout_in_secs'].to_i
                                       else
                                         5
                                       end
 
-          self.read_timeout_in_secs = if config["connection"]["read_timeout_in_secs"].to_i.positive?
-                                        config["connection"]["read_timeout_in_secs"].to_i
+          self.read_timeout_in_secs = if config['connection']['read_timeout_in_secs'].to_i.positive?
+                                        config['connection']['read_timeout_in_secs'].to_i
                                       else
                                         60
                                       end
@@ -195,28 +195,28 @@ module Jfrog
 
         def configure(config_file)
           config = YAML.load_file(config_file)
-          self.parallel_downloads = if config["process"]["parallel_process"].to_i.positive?
-                                      config["process"]["parallel_process"].to_i
+          self.parallel_downloads = if config['process']['parallel_process'].to_i.positive?
+                                      config['process']['parallel_process'].to_i
                                     else
                                       1
                                     end
 
-          self.parallel_downloads = if config["process"]["parallel_downloads"].to_i.positive?
-                                      config["process"]["parallel_downloads"].to_i
+          self.parallel_downloads = if config['process']['parallel_downloads'].to_i.positive?
+                                      config['process']['parallel_downloads'].to_i
                                     else
                                       1
                                     end
 
-          self.historical_log_days = if config["process"]["historical_log_days"].to_i.positive?
-                                       config["process"]["historical_log_days"].to_i
+          self.historical_log_days = if config['process']['historical_log_days'].to_i.positive?
+                                       config['process']['historical_log_days'].to_i
                                      else
                                        1
                                      end
 
-          self.write_logs_by_type = config["process"]["write_logs_by_type"]
+          self.write_logs_by_type = config['process']['write_logs_by_type']
 
-          self.minutes_between_runs = if config["process"]["minutes_between_runs"].to_i.positive?
-                                        config["process"]["minutes_between_runs"].to_i
+          self.minutes_between_runs = if config['process']['minutes_between_runs'].to_i.positive?
+                                        config['process']['minutes_between_runs'].to_i
                                       else
                                         180
                                       end
@@ -234,7 +234,7 @@ module Jfrog
         @proc_config = nil
         @config_path = nil
 
-        @@file_name = ""
+        @@file_name = ''
 
         def self.file_name(file_name)
           @@file_name = file_name
@@ -260,9 +260,9 @@ module Jfrog
           @config_path = if !@@file_name.nil?
                            @@file_name
                          else
-                           ENV["LOG_COLLECTOR_CONFIG"]
+                           ENV['LOG_COLLECTOR_CONFIG']
                          end
-          load_all_config(@config_path, "initialize")
+          load_all_config(@config_path, 'initialize')
         end
 
         def load_all_config(config_file, thread_name)

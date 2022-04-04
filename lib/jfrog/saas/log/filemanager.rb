@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require_relative "confighandler"
-require_relative "constants"
+require_relative 'confighandler'
+require_relative 'constants'
 
 module Jfrog
   module Saas
     module Log
       class FileManager
-        PROCESS_NAME = "log_file_purge"
+        PROCESS_NAME = 'log_file_purge'
         def check_and_create_dir(solution, target_path)
           sol_tgt_path = "#{target_path}/#{solution}"
           unless File.directory?(sol_tgt_path)
@@ -24,12 +24,12 @@ module Jfrog
                                                                                           "param2": diff_days.to_s,
                                                                                           "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
                                                                                           "#{MessageUtils::SOLUTION}": FileManager::PROCESS_NAME } )
-            if diff_days.negative?
-              File.delete(file_name)
-              MessageUtils.instance.log_message(MessageUtils::PURGE_SUCCESS_FOR_FILE, { "param1": file_name.to_s,
-                                                                                        "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
-                                                                                        "#{MessageUtils::SOLUTION}": FileManager::PROCESS_NAME } )
-            end
+            next unless diff_days.negative?
+
+            File.delete(file_name)
+            MessageUtils.instance.log_message(MessageUtils::PURGE_SUCCESS_FOR_FILE, { "param1": file_name.to_s,
+                                                                                      "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                      "#{MessageUtils::SOLUTION}": FileManager::PROCESS_NAME } )
           end
         end
       end

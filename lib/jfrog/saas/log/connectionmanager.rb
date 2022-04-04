@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
-require "faraday"
-require "faraday/net_http"
-require "faraday/response"
-require "faraday/follow_redirects"
-require "faraday/retry"
-require "faraday/gzip"
+require 'faraday'
+require 'faraday/net_http'
+require 'faraday/response'
+require 'faraday/follow_redirects'
+require 'faraday/retry'
+require 'faraday/gzip'
 
-require_relative "commonutils"
-require_relative "confighandler"
-require_relative "constants"
+require_relative 'commonutils'
+require_relative 'confighandler'
+require_relative 'constants'
 
 module Jfrog
   module Saas
@@ -38,7 +38,7 @@ module Jfrog
         end
 
         def common_headers
-          { "Authorization" => "Bearer #{ConfigHandler.instance.conn_config.access_token}" }
+          { 'Authorization' => "Bearer #{ConfigHandler.instance.conn_config.access_token}" }
         end
 
         def additional_headers(additional_headers)
