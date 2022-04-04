@@ -101,5 +101,5 @@ Usage: jfrog-saas-log-collector [options]
 
 ## Contributing
 
-Bug reports are welcome on GitHub at https://github.com/jfrog/jfrog-fluentd-plugins/issues.
+Bug reports are welcome on GitHub at https://github.com/jfrog/jfrog-saas-log-collector/issues.
 
