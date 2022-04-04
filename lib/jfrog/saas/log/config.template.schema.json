@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "connection": {
+      "type": "object",
+      "properties": {
+        "jpd_url": {
+          "type": "string"
+        },
+        "end_point_base": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "access_token": {
+          "type": "string"
+        },
+        "api_key": {
+          "type": "string"
+        },
+        "open_timeout_in_secs": {
+          "type": "integer"
+        },
+        "read_timeout_in_secs": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "jpd_url",
+        "end_point_base",
+        "username",
+        "access_token"
+      ]
+    },
+    "log": {
+      "type": "object",
+      "properties": {
+        "log_ship_config": {
+          "type": "string"
+        },
+        "solutions_enabled": {
+          "type": "string"
+        },
+        "log_types_enabled": {
+          "type": "string"
+        },
+        "uri_date_pattern": {
+          "type": "string"
+        },
+        "audit_repo": {
+          "type": "string"
+        },
+        "log_repo": {
+          "type": "string"
+        },
+        "debug_mode": {
+          "type": "boolean"
+        },
+        "target_log_path": {
+          "type": "string"
+        },
+        "print_with_utc": {
+          "type": "boolean"
+        },
+        "log_file_retention_days": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "log_ship_config",
+        "solutions_enabled",
+        "log_types_enabled",
+        "uri_date_pattern",
+        "audit_repo",
+        "log_repo",
+        "target_log_path"
+      ]
+    },
+    "process": {
+      "type": "object",
+      "properties": {
+        "parallel_process": {
+          "type": "integer"
+        },
+        "parallel_downloads": {
+          "type": "integer"
+        },
+        "historical_log_days": {
+          "type": "integer"
+        },
+        "write_logs_by_type": {
+          "type": "boolean"
+        },
+        "minutes_between_runs": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "write_logs_by_type"
+      ]
+    }
+  },
+  "required": [
+    "connection",
+    "log",
+    "process"
+  ]
+}
