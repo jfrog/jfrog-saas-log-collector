@@ -1,30 +1,32 @@
 # frozen_string_literal: true
 
-source "https://rubygems.org"
+source 'https://rubygems.org'
 
 # Specify your gem's dependencies in jfrog-saas-log-collector.gemspec
 gemspec
 
-gem "rake", "~> 13.0"
+gem 'rake', '~> 13.0'
 
-gem "minitest", "~> 5.0"
+gem 'minitest', '~> 5.0'
 
-gem "rubocop", "~> 1.21"
+gem 'rubocop', '~> 1.21'
 
-gem "faraday", "~> 2.2.0"
+gem 'faraday', '~> 2.2.0'
 
-gem "faraday-follow_redirects"
+gem 'faraday-follow_redirects'
 
-gem "faraday-gzip"
+gem 'faraday-gzip'
 
-gem "faraday-retry"
+gem 'faraday-retry'
 
-gem "zlib"
+gem 'zlib'
 
-gem "parallel"
+gem 'parallel'
 
-gem "logger"
+gem 'logger'
 
-gem "rufus-scheduler"
+gem 'rufus-scheduler'
 
-gem "json-schema"
+gem 'json-schema'
+
+gem 'addressable'

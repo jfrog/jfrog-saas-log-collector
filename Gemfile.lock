@@ -62,6 +62,7 @@ PLATFORMS
   x86_64-darwin-21
 
 DEPENDENCIES
+  addressable
   faraday (~> 2.2.0)
   faraday-follow_redirects
   faraday-gzip

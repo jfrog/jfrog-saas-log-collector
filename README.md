@@ -76,9 +76,9 @@ For all the options supported use
 
 ```shell
 Usage: jfrog-saas-log-collector [options]
-    -c, --config=CONFIG
     -h, --help                       Prints this help
     -g, --generate=CONFIG            Generates sample config file from template to target file provided
+    -c, --config=CONFIG              Executes the jfrog-saas-log-collector with the config file provided
 ```
 
 ## Contributing
