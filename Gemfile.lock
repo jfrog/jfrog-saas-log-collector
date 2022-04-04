@@ -1,7 +1,20 @@
 PATH
   remote: .
   specs:
-    jfrog-saas-log-collector (0.1.0)
+    jfrog-saas-log-collector (0.1.1)
+      addressable (~> 2.8.0)
+      faraday (~> 2.2.0)
+      faraday-follow_redirects (~> 0.2.0)
+      faraday-gzip (~> 0.1.0)
+      faraday-retry (~> 1.0.3)
+      json-schema (~> 2.8.1)
+      logger (~> 1.5.0)
+      minitest (~> 5.0)
+      parallel (~> 1.21.0)
+      rake (~> 13.0)
+      rubocop (~> 1.21)
+      rufus-scheduler (~> 3.8.1)
+      zlib (~> 2.1.1)
 
 GEM
   remote: https://rubygems.org/
@@ -62,20 +75,20 @@ PLATFORMS
   x86_64-darwin-21
 
 DEPENDENCIES
-  addressable
+  addressable (~> 2.8.0)
   faraday (~> 2.2.0)
-  faraday-follow_redirects
-  faraday-gzip
-  faraday-retry
+  faraday-follow_redirects (~> 0.2.0)
+  faraday-gzip (~> 0.1.0)
+  faraday-retry (~> 1.0.3)
   jfrog-saas-log-collector!
-  json-schema
-  logger
+  json-schema (~> 2.8.1)
+  logger (~> 1.5.0)
   minitest (~> 5.0)
-  parallel
+  parallel (~> 1.21.0)
   rake (~> 13.0)
   rubocop (~> 1.21)
-  rufus-scheduler
-  zlib
+  rufus-scheduler (~> 3.8.1)
+  zlib (~> 2.1.1)
 
 BUNDLED WITH
    2.3.3
