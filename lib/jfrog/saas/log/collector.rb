@@ -92,7 +92,7 @@ module Jfrog
 
         def execute_in_timer
           scheduler = Rufus::Scheduler.new
-          scheduler.every "#{ConfigHandler.instance.proc_config.minutes_between_runs}m", first_in: 1 do |job|
+          scheduler.every "#{ConfigHandler.instance.proc_config.minutes_between_runs}m", first_in: 1, overlap: false, name: 'jfrog-saas-log-collector-job' do |job|
             execute
             next_execution_time = job.next_time.to_s
             MessageUtils.instance.log_message(MessageUtils::SCHEDULER_NEXT_RUN, { "param1": next_execution_time,
@@ -189,7 +189,7 @@ module Jfrog
               if SchemaValidator.instance.validate(file)
                 MessageUtils.instance.put_message(MessageUtils::VALID_CONFIG_FILE_PROVIDED, { "param1": file.to_s,
                                                                                               "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
-                                                                                              "#{MessageUtils::SOLUTION}": 'INIT' })
+                                                                                              "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_INIT })
                 config_path = file
               else
                 MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_PROVIDED_IS_NOT_VALID, { "param1": file.to_s,
