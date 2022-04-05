@@ -35,9 +35,11 @@ module Jfrog
         RESOURCE_CHECK_FAILED_DETAIL = "Checking for Resource %<param1>s and it is not found, server response -> \n%<param2>s"
 
         FILE_DOWNLOAD_URL_AND_SIZE = 'Downloading log %<param1>s of size %<param2>s'
-        AUDIT_FILE_CREATION_FAILED = 'Audit File creation for %<param1>s failed'
-        AUDIT_FILE_CREATION_FAILED_DETAIL = "Error while creating audit for %<param1>s, server response -> \n%<param2>s"
-        AUDIT_FILE_CREATION_SUCCESS = 'Audit File for %<param1>s successfully created'
+        AUDIT_FILE_CREATION_FAILED = 'Audit File creation %<param1>s failed'
+        AUDIT_FILE_CREATION_FAILED_DETAIL = "Error while creating audit %<param1>s, server response -> \n%<param2>s"
+        AUDIT_FILE_DELETE_FAILED_DETAIL = "Error while delete audit %<param1>s, server response -> \n%<param2>s"
+        AUDIT_FILE_CREATION_SUCCESS = 'Audit File %<param1>s successfully created'
+        AUDIT_FILE_DELETE_SUCCESS = 'Audit File %<param1>s successfully deleted'
 
         AUDIT_REPO_CREATION_FAILED_DETAIL = "Audit Logs Repo %<param1>s error in creation, server response -> \n%<param2>s"
         AUDIT_REPO_CREATION_SUCCESS = 'Audit Logs Repo %<param1>s successfully created'
@@ -54,8 +56,11 @@ module Jfrog
         LOG_PROCESSED_EXCLUDE = '%<param1>s is already processed, skipping'
         DATE_VS_LOGS_DATA = 'Resulting Logs for %<param1>s -> %<param2>s'
         DATE_VS_PROCESSED_LOGS_DATA = 'Resulting Processed Logs for %<param1>s  -> %<param2>s'
+        SOLUTION_VS_LOCKED_FILE_DATA = 'Resulting locked audit file for %<param1>s  -> %<param2>s'
         PROCESSED_LOGS_AQL_QUERY_RESULT = 'Fetching list of processed logs from AQL with params -> %<param1>s'
         UNPROCESSED_LOGS_AQL_QUERY_RESULT = 'Fetching list of logs from AQL with params -> %<param1>s'
+        AUDIT_LOCK_AQL_QUERY_RESULT = 'Fetching if audit file is locked, AQL with params -> %<param1>s'
+        LOCKED_AUDIT_FILES_CLEARED_RESULT = 'Cleared audit locks -> %<param1>s'
 
         PURGE_RETAIN_DAYS_FOR_FILE = 'File %<param1>s has time of %<param2>s days to be retained'
         PURGE_SUCCESS_FOR_FILE = 'File %<param1>s purged successfully'
