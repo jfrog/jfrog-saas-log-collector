@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email = ['vasukin@jfrog.com']
 
   spec.summary = 'JFrog Saas Log Collector gem is intended for downloading and extracting of log files generated in Artifactory or Xray on the Jfrog Cloud.'
-  spec.description = 'JFrog Saas Log Collector gem is intended for downloading and extracting of log files generated in Artifactory or Xray on the Jfrog Cloud.'
+  spec.description = 'JFrog Saas Log Collector gem is intended for downloading and extracting of log files generated in Artifactory or Xray on the Jfrog Cloud. For more information on the usage refer the wiki on https://github.com/jfrog/jfrog-saas-log-collector/wiki'
   spec.homepage = 'https://github.com/jfrog/jfrog-saas-log-collector/wiki'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.7.0'
@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.metadata['homepage_uri'] = 'https://github.com/jfrog/jfrog-saas-log-collector/wiki'
   spec.metadata['source_code_uri'] = 'https://github.com/jfrog/jfrog-saas-log-collector'
-  spec.metadata['changelog_uri'] = 'https://github.com/jfrog/jfrog-saas-log-collector/commits/main'
+  spec.metadata['changelog_uri'] = 'https://github.com/jfrog/jfrog-saas-log-collector/blob/main/CHANGELOG.md'
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject do |f|
