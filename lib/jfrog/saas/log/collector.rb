@@ -26,6 +26,7 @@ module Jfrog
           logs = {}
           dates = CommonUtils.instance.logs_to_process_between(solution, start_date_str, end_date_str)
           dates.each do |date|
+            CommonUtils.instance.clear_audit_locks(solution, date)
             logs_to_process = CommonUtils.instance.logs_to_process_hash(solution, date)
             logs["#{solution}#{CommonUtils::DELIM}#{date}"] = logs_to_process
           end

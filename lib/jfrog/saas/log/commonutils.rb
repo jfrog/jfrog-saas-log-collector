@@ -67,7 +67,11 @@ module Jfrog
           "items.find({\"repo\": \"#{((audit_repo_url).split("/"))[1]}\", \"path\" : {\"$match\":\"#{solution}/#{date_in_string}\"}, \"name\" : {\"$match\":\"*log.gz#{CommonUtils::STATUS_FILE_SUFFIX}\"}})"
         end
 
-        def audit_file_lock(solution, download_file_name)
+        def audit_aql_locked_files_body(solution, date_in_string)
+          "items.find({\"repo\": \"#{((audit_repo_url).split("/"))[1]}\", \"path\" : {\"$match\":\"#{solution}/#{date_in_string}\"}, \"name\" : {\"$match\":\"*log.gz#{CommonUtils::LOCK_FILE_SUFFIX}\"}})"
+        end
+
+        def audit_specific_file_lock(solution, download_file_name)
           "items.find({\"repo\": \"#{((audit_repo_url).split("/"))[1]}\", \"path\" : {\"$match\":\"#{solution}/*\"}, \"name\" : {\"$match\":\"#{download_file_name}#{CommonUtils::LOCK_FILE_SUFFIX}\"}})"
         end
 
@@ -271,7 +275,7 @@ module Jfrog
         def audit_lock_file(solution, audit_file)
           audit_lock_file_found = false
           conn_mgr = ConnectionManager.new
-          body = audit_file_lock(solution, audit_file)
+          body = audit_specific_file_lock(solution, audit_file)
           headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_TEXT }
           if ConfigHandler.instance.log_config.debug_mode
             MessageUtils.instance.log_message(MessageUtils::AUDIT_LOCK_AQL_QUERY_RESULT, { "param1": body.to_s,
@@ -333,11 +337,38 @@ module Jfrog
           status_audit_success
         end
 
+        def clear_audit_locks(solution, date_in_string)
+          locks_cleared = []
+          conn_mgr = ConnectionManager.new
+          headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_TEXT }
+          body =  audit_aql_locked_files_body(solution, date_in_string)
+          response = conn_mgr.execute(artifactory_aql_url, nil, headers, body, CommonUtils::HTTP_POST, false)
+          if !response.nil? && (response.status >= 200 && response.status < 300) && response.headers[CommonUtils::CONTENT_TYPE_HDR] == CommonUtils::CONTENT_TYPE_JSON
+            parsed_json = JSON.parse(response.body)
+            total_records = parsed_json['range']['total']
+            if total_records.positive?
+              results = parsed_json['results']
+              results.each do |log_file_detail|
+                created_time = DateTime.parse(log_file_detail['created'])
+                diff_minutes = ((DateTime.now - created_time) * 24 * 60).to_i
+                if diff_minutes >= ConfigHandler.instance.proc_config.minutes_between_runs
+                  handle_audit_file(solution, date_in_string, "#{log_file_detail['name']}", CommonUtils::FILE_PROCESSING_LOCK, CommonUtils::HTTP_DELETE)
+                  locks_cleared.push(log_file_detail['name'])
+                end
+              end
+            end
+          end
+          MessageUtils.instance.log_message(MessageUtils::LOCKED_AUDIT_FILES_CLEARED_RESULT, { "param1": locks_cleared.to_s,
+                                                                                             "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG,
+                                                                                             "#{MessageUtils::SOLUTION}": solution })
+          locks_cleared
+        end
+
         def logs_processed(solution, date_in_string)
           logs_processed = []
           conn_mgr = ConnectionManager.new
-          body = audit_aql_body(solution, date_in_string)
           headers = { CommonUtils::CONTENT_TYPE_HDR => CommonUtils::CONTENT_TYPE_TEXT }
+          body = audit_aql_body(solution, date_in_string)
           if ConfigHandler.instance.log_config.debug_mode
             MessageUtils.instance.log_message(MessageUtils::PROCESSED_LOGS_AQL_QUERY_RESULT, { "param1": body.to_s,
                                                                                                "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_DEBUG,
