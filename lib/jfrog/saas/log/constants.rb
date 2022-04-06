@@ -75,6 +75,9 @@ module Jfrog
         SHUT_DOWN_PROCESS = 'Shutting down process p_id #%<param1>s, terminating jfrog-saas-log-collector operation'
         TERMINATING_THREAD = 'Terminating thread t_id - #%<param1>s'
 
+        VALIDATION_SCHEMA_FILE_DETAIL = 'Configuration file is validated against the schema in the following file %<param1>s'
+        WHITELIST_FILE_DETAIL = 'JPD url file is validated against the whitelist in the following file %<param1>s'
+
         SOLUTION_OVERRIDE_TERMINATE = 'terminate'
         SOLUTION_OVERRIDE_INIT = 'init'
         SOLUTION_OVERRIDE_START = 'start'
