@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
+
 require 'English'
 require 'rufus/scheduler'
 require 'parallel'
@@ -123,6 +126,9 @@ module Jfrog
 
         def jpd_whitelisted(jpd_url)
           whitelisted_domains_yaml = YAML.load_file(File.open(File.join(File.dirname(__FILE__), 'whitelisted_domains.yaml')))
+          MessageUtils.instance.put_message(MessageUtils::WHITELIST_FILE_DETAIL, { "param1": File.join(File.dirname(__FILE__), 'whitelisted_domains.yaml').to_s,
+                                                                                           "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                           "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_INIT })
           whitelisted_domains = whitelisted_domains_yaml['whitelist']['domains']
           uri = Addressable::URI.parse(jpd_url)
           if whitelisted_domains.include? uri.domain
@@ -133,26 +139,32 @@ module Jfrog
         end
 
         def validate(config_file)
-          config_valid = false
+          config_valid = true
           config_file_yaml = YAML.load_file(config_file)
           config_in_json = config_file_yaml.to_json
           config_schema_file = File.open((File.join(File.dirname(__FILE__), 'config.template.schema.json')))
+          MessageUtils.instance.put_message(MessageUtils::VALIDATION_SCHEMA_FILE_DETAIL, { "param1": (File.join(File.dirname(__FILE__), 'config.template.schema.json')).to_s,
+                                                                                                  "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                                  "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_INIT })
+
           config_schema = JSON.parse(config_schema_file.read)
-          begin
-            JSON::Validator.validate!(config_schema, config_in_json)
-            jpd_url = (config_file_yaml['connection']['jpd_url']).to_s.strip
-            if jpd_whitelisted(jpd_url)
-              config_valid = true
-            else
-              MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_VALIDATION_FAILED_DETAILS, { "param1": "#{config_file.to_s} contains JPD URL which is not permitted",
-                                                                                                   "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                                   "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
-              config_valid = false
+          if !config_schema.nil? && !config_in_json.nil?
+            begin
+              JSON::Validator.validate!(config_schema, config_in_json)
+              jpd_url = (config_file_yaml['connection']['jpd_url']).to_s.strip
+              if jpd_whitelisted(jpd_url)
+                config_valid = true
+              else
+                MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_VALIDATION_FAILED_DETAILS, { "param1": "#{config_file.to_s} contains JPD URL which is not permitted",
+                                                                                                         "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                         "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
+                config_valid = false
+              end
+            rescue JSON::Schema::ValidationError
+              MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_VALIDATION_FAILED_DETAILS, { "param1": $ERROR_INFO.message,
+                                                                                                       "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                       "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
             end
-          rescue JSON::Schema::ValidationError
-            MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_VALIDATION_FAILED_DETAILS, { "param1": $ERROR_INFO.message,
-                                                                                                     "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                                     "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
           end
           config_valid
         end
@@ -188,15 +200,15 @@ module Jfrog
               file = file.strip
               YAML.parse(File.open(file))
               if SchemaValidator.instance.validate(file)
-                MessageUtils.instance.put_message(MessageUtils::VALID_CONFIG_FILE_PROVIDED, { "param1": file.to_s,
-                                                                                              "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
-                                                                                              "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_INIT })
-                config_path = file
+               MessageUtils.instance.put_message(MessageUtils::VALID_CONFIG_FILE_PROVIDED, { "param1": file.to_s,
+                                                                                             "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_INFO,
+                                                                                             "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_INIT })
+              config_path = file
               else
-                MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_PROVIDED_IS_NOT_VALID, { "param1": file.to_s,
-                                                                                                     "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
-                                                                                                     "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
-                exit 0
+               MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_PROVIDED_IS_NOT_VALID, { "param1": file.to_s,
+                                                                                                    "#{MessageUtils::LOG_LEVEL}": CommonUtils::LOG_ERROR,
+                                                                                                    "#{MessageUtils::SOLUTION}": MessageUtils::SOLUTION_OVERRIDE_TERMINATE })
+               exit 0
               end
             rescue StandardError
               MessageUtils.instance.put_message(MessageUtils::CONFIG_FILE_PROVIDED_IS_NOT_VALID, { "param1": file.to_s,

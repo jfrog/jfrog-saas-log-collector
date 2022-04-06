@@ -29,3 +29,7 @@ gem 'rufus-scheduler', '~> 3.8.1'
 gem 'json-schema', '~> 2.8.1'
 
 gem 'addressable', '~> 2.8.0'
+
+gem 'tzinfo', '~> 2.0.4'
+
+gem 'tzinfo-data', '~> 1.2021.5'
