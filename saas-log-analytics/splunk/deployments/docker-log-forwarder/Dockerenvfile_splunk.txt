@@ -1,0 +1,6 @@
+JF_PRODUCT_SAAS_DATA=/jfrog/saas/logs
+HEC_HOST=changeme
+HEC_PORT=changeme
+HEC_TOKEN=changeme
+COM_PROTOCOL=changeme
+INSECURE_SSL=changeme

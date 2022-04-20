@@ -1,0 +1,98 @@
+<source>
+  @type tail
+  @id artifactory_request_tail
+  path "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/*artifactory-request*.log"
+  pos_file "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/artifactory-request.log.pos"
+  tag jfrog.rt.artifactory.request
+  read_from_head true
+  refresh_interval 10
+  follow_inodes true
+  skip_refresh_on_startup true
+  read_bytes_limit_per_second 104857600
+  <parse>
+    @type none
+  </parse>
+</source>
+<filter jfrog.rt.artifactory.request>
+  @type parser
+  key_name message
+  <parse>
+    @type regexp
+    expression ^(?<timestamp>[^ ]*)\|(?<trace_id>[^\|]*)\|(?<remote_address>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.+)$
+    time_key timestamp
+    time_type mixed
+    time_format %Y-%m-%dT%H:%M:%S.%LZ
+    time_format_fallbacks %Y-%m-%dT%H:%M:%SZ
+  </parse>
+  emit_invalid_record_to_error false
+</filter>
+<filter jfrog.rt.artifactory.request>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    repo ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2") ? (record["request_url"].split('/')[3]) : ("")}
+    image ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2")  ? (record["request_url"].split('/')[5]) : ("")}
+  </record>
+</filter>
+<source>
+  @type tail
+  @id access_request_tail
+  path "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/*access-request*.log"
+  pos_file "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/access-request.log.pos"
+  tag jfrog.rt.access.request
+  read_from_head true
+  refresh_interval 10
+  follow_inodes true
+  skip_refresh_on_startup true
+  read_bytes_limit_per_second 104857600
+  <parse>
+    @type regexp
+    expression ^(?<timestamp>[^ ]*)\|(?<trace_id>[^\|]*)\|(?<remote_address>[^\|]*)\|(?<username>[^\|]*)\|(?<request_method>[^\|]*)\|(?<request_url>[^\|]*)\|(?<return_status>[^\|]*)\|(?<response_content_length>[^\|]*)\|(?<request_content_length>[^\|]*)\|(?<request_duration>[^\|]*)\|(?<request_user_agent>.+)$
+    time_key timestamp
+    time_type mixed
+    time_format %Y-%m-%dT%H:%M:%S.%LZ
+    time_format_fallbacks %Y-%m-%dT%H:%M:%SZ
+  </parse>
+</source>
+<source>
+  @type tail
+  @id access_security_audit_tail
+  path "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/*access-security-audit*.log"
+  pos_file "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/access-security-audit.log.pos"
+  tag jfrog.rt.access.audit
+  read_from_head true
+  refresh_interval 10
+  follow_inodes true
+  skip_refresh_on_startup true
+  read_bytes_limit_per_second 104857600
+  <parse>
+    @type regexp
+    expression /^(?<timestamp>[^ ]*)\|(?<token_id>[^ ]*)\|(?<user_ip>[^ ]*)\|(?<user>[^ ]*)\|(?<logged_principal>[^ ]*)\|(?<entity_name>[^ ]*)\|(?<event_type>[^ ]*)\|(?<event>[^ ]*)\|(?<data_changed>.*)/
+    time_key timestamp
+    time_type mixed
+    time_format %Y-%m-%dT%H:%M:%S.%LZ
+    time_format_fallbacks %Y-%m-%dT%H:%M:%SZ
+  </parse>
+</source>
+<filter jfrog.**>
+  @type record_transformer
+  <record>
+    hostname "#{Socket.gethostname}"
+    log_source ${tag}
+  </record>
+</filter>
+<match jfrog.**>
+  @type splunk_hec
+  protocol "#{ENV['COM_PROTOCOL']}"
+  hec_host "#{ENV['HEC_HOST']}"
+  hec_port "#{ENV['HEC_PORT']}"
+  hec_token "#{ENV['HEC_TOKEN']}"    
+  index jfrog_splunk_saas
+  sourcetype_key log_source
+  # buffered output parameter
+  flush_interval 10s
+  insecure_ssl "#{ENV['INSECURE_SSL']}"
+  # ssl parameter
+  #use_ssl true
+  #ca_file /path/to/ca.pem
+</match>

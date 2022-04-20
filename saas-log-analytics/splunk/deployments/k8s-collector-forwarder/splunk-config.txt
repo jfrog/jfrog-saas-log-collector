@@ -1,0 +1,5 @@
+splunk_host=changeme
+splunk_port=changeme
+splunk_token=changeme
+splunk_com_protocol=changeme
+splunk_insecure_ssl=changeme

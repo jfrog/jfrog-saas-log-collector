@@ -1,0 +1,17 @@
+-- Create what is needed
+
+kubectl create ns jfrog-saas
+kubectl create secret generic jfrog-saas-log-collector-secret --from-file=saas-config=saas-config.yaml -n jfrog-saas
+kubectl create configmap splunk-settings --from-env-file=splunk-config.txt -n jfrog-saas
+kubectl apply -f pvc.yaml -n jfrog-saas
+kubectl apply -f deployment.yaml -n jfrog-saas
+
+
+
+-- Delete what has been created
+
+kubectl delete -f deployment.yaml -n jfrog-saas
+kubectl delete -f pvc.yaml -n jfrog-saas
+kubectl delete configmap splunk-settings -n jfrog-saas
+kubectl delete secret jfrog-saas-log-collector-secret -n jfrog-saas
+kubectl delete ns jfrog-saas

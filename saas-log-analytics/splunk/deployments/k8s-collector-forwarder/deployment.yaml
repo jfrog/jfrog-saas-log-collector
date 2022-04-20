@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jfrog-saas-log-collector-deploy
+  labels:
+    app: jfrog-saas-log-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jfrog-saas-log-collector
+  template:
+    metadata:
+      labels:
+        app: jfrog-saas-log-collector
+    spec:
+      containers:
+        - name: jfrog-saas-log-collector
+          image: "ruby:2.7.5-alpine3.15"
+          resources:
+            requests:
+              memory: "2048Mi"
+              cpu: "250m"
+            limits:
+              memory: "4096Mi"
+              cpu: "500m"
+          imagePullPolicy: "IfNotPresent"
+          command:
+            - "sh"
+            - "-c"
+            - >
+              apk update && apk add --no-cache build-base;
+              gem install tzinfo;
+              gem install tzinfo-data;
+              gem install jfrog-saas-log-collector;
+              jfrog-saas-log-collector -c /jfrog/saas/config/saas-config.yaml
+          volumeMounts:
+            - name: jfrog-saas-log-collector-log
+              mountPath: "/jfrog/saas/logs"
+            - name: jfrog-saas-log-collector-config
+              mountPath: "/jfrog/saas/config"
+        - name: "jfrog-saas-log-collector-fluentd-sidecar"
+          image: "docker.io/bitnami/fluentd"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 0
+          env:
+            - name: JF_PRODUCT_SAAS_DATA
+              value: "/jfrog/saas/logs"
+            - name: HEC_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: splunk-settings
+                  key: splunk_host
+            - name: HEC_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: splunk-settings
+                  key: splunk_port
+            - name: HEC_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: splunk-settings
+                  key: splunk_token
+            - name: COM_PROTOCOL
+              valueFrom:
+                configMapKeyRef:
+                  name: splunk-settings
+                  key: splunk_com_protocol
+            - name: INSECURE_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: splunk-settings
+                  key: splunk_insecure_ssl  
+          resources:
+            requests:
+              memory: "2048Mi"
+              cpu: "250m"
+            limits:
+              memory: "4096Mi"
+              cpu: "500m"
+          imagePullPolicy: "IfNotPresent"
+          command:
+            - 'sh'
+            - '-c'
+            - >
+              echo "Installing fluent-plugin-splunk-hec"; 
+              gem install fluent-plugin-splunk-hec --no-doc;
+              curl https://raw.githubusercontent.com/jfrog/log-analytics-splunk/jfrog-saas-log-splunk/saas/config/fluent.conf.saas.rt -o /jfrog/saas/logs/fluentd.conf;
+              cat /jfrog/saas/logs/fluentd.conf;
+              fluentd -c /jfrog/saas/logs/fluentd.conf
+          volumeMounts:
+            - name: jfrog-saas-log-collector-log
+              mountPath: "/jfrog/saas/logs"
+      volumes:
+        - name: jfrog-saas-log-collector-log
+          persistentVolumeClaim:
+            claimName: jfrog-saas-log-collector-pvc
+        - name: jfrog-saas-log-collector-config
+          secret:
+            secretName: jfrog-saas-log-collector-secret
+            items:
+            - key: saas-config
+              path: saas-config.yaml
+

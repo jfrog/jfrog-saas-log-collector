@@ -1,0 +1,6 @@
+
+Step 1: docker build -t jfrog/saas-log-collector .
+
+Step 2: docker run -it --name jfrog-saas-log-collector -v /var/opt/jfrog/saas/logs:/jfrog/saas/logs --env-file Dockerenvfile.txt jfrog/saas-log-collector
+
+For Testing: docker run -it --name jfrog-saas-log-collector -v /Volumes/data/saas/logs:/jfrog/saas/logs --env-file Dockerenvfile_local.txt jfrog/saas-log-collector

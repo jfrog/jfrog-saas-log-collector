@@ -1,0 +1,6 @@
+
+Step 1: docker build -t jfrog/fluentd-splunk-saas .
+
+Step 2: docker run -it --name jfrog-fluentd-splunk-saas -v /Volumes/data/saas/logs:/jfrog/saas/logs --env-file Dockerenvfile_splunk.txt jfrog/fluentd-splunk-saas
+
+For Testing: docker run -it --name jfrog-fluentd-splunk-saas -v /Volumes/data/saas/logs:/jfrog/saas/logs --env-file Dockerenvfile_splunk_local.txt jfrog/fluentd-splunk-saas
