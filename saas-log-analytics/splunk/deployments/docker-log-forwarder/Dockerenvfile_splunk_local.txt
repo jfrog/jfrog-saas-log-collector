@@ -1,6 +1,0 @@
-JF_PRODUCT_SAAS_DATA=/jfrog/saas/logs
-HEC_HOST=host.docker.internal
-HEC_PORT=8088
-HEC_TOKEN=0627392a-1e71-4b69-a752-0541f18f77e9
-COM_PROTOCOL=http
-INSECURE_SSL=false
