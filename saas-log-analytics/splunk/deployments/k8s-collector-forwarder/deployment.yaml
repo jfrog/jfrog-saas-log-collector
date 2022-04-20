@@ -86,7 +86,7 @@ spec:
             - >
               echo "Installing fluent-plugin-splunk-hec"; 
               gem install fluent-plugin-splunk-hec --no-doc;
-              curl https://raw.githubusercontent.com/jfrog/log-analytics-splunk/jfrog-saas-log-splunk/saas/config/fluent.conf.saas.rt -o /jfrog/saas/logs/fluentd.conf;
+              curl https://raw.githubusercontent.com/jfrog/jfrog-saas-log-collector/main/saas-log-analytics/splunk/fluentd-config/fluent.conf.saas.rt -o /jfrog/saas/logs/fluentd.conf;
               cat /jfrog/saas/logs/fluentd.conf;
               fluentd -c /jfrog/saas/logs/fluentd.conf
           volumeMounts:
