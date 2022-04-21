@@ -1,0 +1,343 @@
+<form version="1.1" script="jfrog-saas-logs.js" stylesheet="jfrog-saas-logs.css" hideEdit="true" isDashboard="true">
+  <label>SaaS Log Analytics</label>
+  <description>SaaS Log Analytics for JFrog Cloud</description>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time_field" searchWhenChanged="true">
+      <label>Time of Interest</label>
+      <default>
+        <earliest>-7d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row id="tabs">
+    <panel>
+      <html>
+        <ul id="tabs" class="nav nav-tabs">
+          <li class="active">
+            <a href="#Logs" class="toggle-tab" data-toggle="tab" data-elements="logs1,logs2,logs3" data-token="logs_control">Logs</a>
+          </li>
+          <li>
+            <a href="#Operations" class="toggle-tab" data-toggle="tab" data-elements="ops1,ops2,ops3,ops4,ops5" data-token="ops_control">Operations</a>
+          </li>
+        </ul>
+      </html>
+    </panel>
+  </row>
+  <row id="logs1">
+    <panel>
+      <title>Top Accessed Images over time by number of request</title>
+      <chart>
+        <title>Top Accessed Images</title>
+        <search>
+          <query>`default_index` $logs_control$ (sourcetype="jfrog.rt.artifactory.request" OR log_source="jfrog.rt.artifactory.request") request_url="/api/docker/*" repo!="NULL" image!="NULL" repo!="" image!="" repo!="latest" repo!="token" image!="token" | timechart count by image | sort - count | head 10</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">TIMELINE</option>
+        <option name="charting.axisTitleY.text">No of Requests</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Accessed Repositories over time by number of request</title>
+      <chart>
+        <title>Top Accessed Repositories</title>
+        <search>
+          <query>`default_index` $logs_control$ (sourcetype="jfrog.rt.artifactory.request" OR log_source="jfrog.rt.artifactory.request") request_url="/api/docker/*" repo!="NULL" image!="NULL" repo!="" image!="" repo!="latest" repo!="token" image!="token" | timechart count by repo | sort - count | head 10</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">TIMELINE</option>
+        <option name="charting.axisTitleY.text">No of Requests</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+  <row id="logs2">
+    <panel>
+      <title>Data Transfers (GBs) Downloads By Repo</title>
+      <chart>
+        <title>Data Transfers (GBs) Downloads</title>
+        <search>
+          <query>`default_index` $logs_control$ (sourcetype="jfrog.rt.artifactory.request" OR log_source="jfrog.rt.artifactory.request") request_url="/api/docker/*" repo!="NULL" image!="NULL" repo!="" image!="" repo!="latest" repo!="token" image!="token" request_content_length != -1 | eval gb=request_content_length/1073741824 | stats sum(gb) as GB by repo | sort - GB</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Repository</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Data Transfers (GBs) Uploads By Repo</title>
+      <chart>
+        <title>Data Transfers (GBs) Uploads</title>
+        <search>
+          <query>`default_index` $logs_control$ (sourcetype="jfrog.rt.artifactory.request" OR log_source="jfrog.rt.artifactory.request") request_url="/api/docker/*" repo!="NULL" image!="NULL" repo!="" image!="" repo!="latest" repo!="token" image!="token" response_content_length != -1 | eval gb=response_content_length/1073741824 | stats sum(gb) as GB by repo | sort - GB</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Repository</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row id="logs3">
+    <panel>
+      <title>Top 10 IPs By Downloads</title>
+      <chart>
+        <title>Top 10 IPs By Downloads</title>
+        <search>
+          <query>`default_index` $logs_control$ (sourcetype="jfrog.rt.artifactory.request" OR log_source="jfrog.rt.artifactory.request") request_content_length!="-1" | eval gb=request_content_length/1073741824 | stats sum(gb) as download_size by remote_address | top limit=10 remote_address,download_size | fields - count,percent | sort - download_size</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Remote Address</option>
+        <option name="charting.axisTitleY.text">Downloads in GB</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top 10 IPs By Uploads</title>
+      <chart>
+        <title>Top 10 IPs By Uploads</title>
+        <search>
+          <query>`default_index` $logs_control$ (sourcetype="jfrog.rt.artifactory.request" OR log_source="jfrog.rt.artifactory.request") response_content_length!="-1" | eval gb=response_content_length/1073741824 | stats sum(gb) as upload_size by remote_address | top limit=10 remote_address,upload_size | fields - count,percent | sort - upload_size</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Remote Address</option>
+        <option name="charting.axisTitleY.text">Upload in GB</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row id="ops1">
+    <panel>
+      <title>Operations on Tokens</title>
+      <chart>
+        <title>Token Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=TKN entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Username</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Action on Tokens</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">_aggregation</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Operations on Users</title>
+      <chart>
+        <title>User Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event= "USR" entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Username</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Action on Users</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">_aggregation</option>
+      </chart>
+    </panel>
+  </row>
+  <row id="ops2">
+    <panel>
+      <title>Operations on Permissions</title>
+      <chart>
+        <title>Permission Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=TKN entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Username</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Action on Tokens</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">_aggregation</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Operations on Groups</title>
+      <chart>
+        <title>Group Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event= "USR" entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Username</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Action on Users</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">_aggregation</option>
+      </chart>
+    </panel>
+  </row>
+  <row id="ops3">
+    <panel>
+      <title>Operations on Tokens</title>
+      <chart>
+        <title>Token Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=TKN entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | timechart count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Operations on Users</title>
+      <chart>
+        <title>User Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=USR entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | timechart count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row id="ops4">
+    <panel>
+      <title>Operations on Groups</title>
+      <chart>
+        <title>Group Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=GRP entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Operations on Permissions</title>
+      <chart>
+        <title>Permission Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=PERM entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row id="ops5">
+    <panel>
+    <title>Operations Summary</title>
+      <table>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=TKN entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*"| eval event_type=if(event_type="C","CREATE",event_type), event_type=if(event_type="U","UPDATE",event_type), event_type=if(event_type="D","DELETE",event_type), event=if(event="TKN","TOKEN",event) , event=if(event="GRP","GROUP",event), event=if(event="USR","USER",event), event=if(event="PERM","PERMISSION",event)| eval _url = row.data_changed | eval Time = strftime(_time, "%Y-%d-%m %H:%M:%S") | fields - _time, username | table Time, entity_name, event, event_type, data_changed | rename entity_name AS "Entity Name",event AS "Event", event_type AS "Event Type",data_changed AS "Data Changed" </query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="height">650</option>
+        <drilldown>
+          <condition field="data_changed">
+            <link target="_blank">$click.value2|n$</link>
+          </condition>
+        </drilldown>
+      </table>
+    </panel>
+  </row>
+</form>
