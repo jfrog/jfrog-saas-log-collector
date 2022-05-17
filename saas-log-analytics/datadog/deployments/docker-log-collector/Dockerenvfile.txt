@@ -1,0 +1,10 @@
+saas_jpd_url=changeme
+admin_user=changeme
+path_to_extract_logs_for_artifactory=\/jfrog\/saas\/logs
+solutions_enabled=["artifactory", "xray"]
+log_types_enabled=["access-request", "access-security-audit", "artifactory-request", "xray-request"]
+print_with_utc=false
+write_logs_by_type=false
+historical_log_days=5
+log_file_retention_days=5
+admin_access_token=changeme

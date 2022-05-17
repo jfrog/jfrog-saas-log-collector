@@ -1,0 +1,2 @@
+JF_PRODUCT_SAAS_DATA=/jfrog/saas/logs
+DATADOG_API_KEY=changeme
