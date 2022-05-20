@@ -18,22 +18,6 @@
     time_format_fallbacks %Y-%m-%dT%H:%M:%SZ
   </parse>
 </source>
-<filter jfrog.rt.artifactory.request>
-  @type record_transformer
-  enable_ruby true
-  <record>
-    repo ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2") ? (record["request_url"].split('/')[3]) : ("")}
-    image ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2")  ? (record["request_url"].split('/')[5]) : ("")}
-  </record>
-</filter>
-<filter jfrog.rt.artifactory.request>
-  @type record_transformer
-  enable_ruby true
-  <record>
-    response_content_length_2 ${record["response_content_length"].to_f}
-    request_content_length_2 ${record["request_content_length"].to_f}
-  </record>
-</filter>
 
 <source>
   @type tail
@@ -77,6 +61,24 @@
   </parse>
 </source>
 
+<filter jfrog.rt.artifactory.request>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    repo ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2") ? (record["request_url"].split('/')[3]) : ("")}
+    image ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2")  ? (record["request_url"].split('/')[5]) : ("")}
+  </record>
+</filter>
+
+<filter jfrog.rt.artifactory.request>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    response_content_length_2 ${record["response_content_length"].to_f}
+    request_content_length_2 ${record["request_content_length"].to_f}
+  </record>
+</filter>
+
 <filter jfrog.**>
   @type record_transformer
   <record>
@@ -91,9 +93,6 @@
 <match jfrog.**>
   @type copy
   <store>
-    @type stdout
-  </store>
-  <store>
     @type datadog
     @id datadog_agent_jfrog_saas
     api_key "#{ENV['DATADOG_API_KEY']}"
@@ -101,12 +100,8 @@
     include_tag_key true
     tag_key ${tag}
     dd_source jfrogsaas
-    <buffer>
-            @type memory
-            flush_thread_count 10
-            flush_interval 10s
-            chunk_limit_size 1m
-            chunk_limit_records 500
-    </buffer>
+  </store>
+  <store>
+    @type stdout
   </store>
 </match>
