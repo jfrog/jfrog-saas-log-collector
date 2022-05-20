@@ -92,7 +92,7 @@
 ####################
 <match jfrog.**>
   @type datadog
-  @id datadog_agent_jfrog_saas
+  @id datadog_agent_jfrog_artifactory
   api_key "#{ENV['DATADOG_API_KEY']}"
   #optional
   include_tag_key true
