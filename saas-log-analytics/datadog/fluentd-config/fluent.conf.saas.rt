@@ -3,7 +3,7 @@
   @id artifactory_request_tail
   path "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/*artifactory-request*.log"
   pos_file "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/artifactory-request.log.pos"
-  tag jfrog.rt.artifactory.request
+  tag jfrog.saas.rt.artifactory.request
   read_from_head true
   refresh_interval 10
   follow_inodes true
@@ -24,7 +24,7 @@
   @id access_request_tail
   path "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/*access-request*.log"
   pos_file "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/access-request.log.pos"
-  tag jfrog.rt.access.request
+  tag jfrog.saas.rt.access.request
   read_from_head true
   refresh_interval 10
   follow_inodes true
@@ -45,7 +45,7 @@
   @id access_security_audit_tail
   path "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/*access-security-audit*.log"
   pos_file "#{ENV['JF_PRODUCT_SAAS_DATA']}/artifactory/access-security-audit.log.pos"
-  tag jfrog.rt.access.audit
+  tag jfrog.saas.rt.access.audit
   read_from_head true
   refresh_interval 10
   follow_inodes true
@@ -61,7 +61,7 @@
   </parse>
 </source>
 
-<filter jfrog.rt.artifactory.request>
+<filter jfrog.saas.rt.artifactory.request>
   @type record_transformer
   enable_ruby true
   <record>
@@ -70,7 +70,7 @@
   </record>
 </filter>
 
-<filter jfrog.rt.artifactory.request>
+<filter jfrog.saas.rt.artifactory.request>
   @type record_transformer
   enable_ruby true
   <record>
@@ -96,5 +96,5 @@
   api_key "#{ENV['DATADOG_API_KEY']}"
   #optional
   include_tag_key true
-  dd_source jfrogsaas
+  dd_source fluentd
 </match>
