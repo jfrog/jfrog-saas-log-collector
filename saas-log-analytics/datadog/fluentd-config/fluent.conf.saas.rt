@@ -18,6 +18,14 @@
     time_format_fallbacks %Y-%m-%dT%H:%M:%SZ
   </parse>
 </source>
+<filter jfrog.saas.rt.artifactory.request>
+  @type record_transformer
+  enable_ruby true
+  <record>
+    repo ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2") ? (record["request_url"].split('/')[3]) : ("")}
+    image ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2")  ? (record["request_url"].split('/')[5]) : ("")}
+  </record>
+</filter>
 
 <source>
   @type tail
@@ -65,15 +73,6 @@
   @type record_transformer
   enable_ruby true
   <record>
-    repo ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2") ? (record["request_url"].split('/')[3]) : ("")}
-    image ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2")  ? (record["request_url"].split('/')[5]) : ("")}
-  </record>
-</filter>
-
-<filter jfrog.saas.rt.artifactory.request>
-  @type record_transformer
-  enable_ruby true
-  <record>
     response_content_length_2 ${record["response_content_length"].to_f}
     request_content_length_2 ${record["request_content_length"].to_f}
   </record>
@@ -94,7 +93,13 @@
   @type datadog
   @id datadog_agent_jfrog_artifactory
   api_key "#{ENV['DATADOG_API_KEY']}"
-  #optional
   include_tag_key true
   dd_source fluentd
+  <buffer>
+    @type memory
+    flush_thread_count 4
+    flush_interval 5s
+    chunk_limit_size 1m
+    chunk_limit_records 500
+  </buffer>
 </match>
