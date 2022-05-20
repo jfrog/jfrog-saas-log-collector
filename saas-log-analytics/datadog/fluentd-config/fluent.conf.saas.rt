@@ -89,17 +89,24 @@
 # DATADOG OUTPUT
 ####################
 <match jfrog.**>
-  @type datadog
-  @id datadog_agent_jfrog_saas
-  api_key "#{ENV['DATADOG_API_KEY']}"
-  #optional
-  include_tag_key true
-  dd_source jfrogsaas
-  <buffer>
-          @type memory
-          flush_thread_count 10
-          flush_interval 3s
-          chunk_limit_size 5m
-          chunk_limit_records 500
-  </buffer>
+  @type copy
+  <store>
+    @type stdout
+  </store>
+  <store>
+    @type datadog
+    @id datadog_agent_jfrog_saas
+    api_key "#{ENV['DATADOG_API_KEY']}"
+    #optional
+    include_tag_key true
+    tag_key ${tag}
+    dd_source jfrogsaas
+    <buffer>
+            @type memory
+            flush_thread_count 10
+            flush_interval 10s
+            chunk_limit_size 1m
+            chunk_limit_records 500
+    </buffer>
+  </store>
 </match>
