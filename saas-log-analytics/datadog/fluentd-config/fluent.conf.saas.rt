@@ -95,4 +95,11 @@
   #optional
   include_tag_key true
   dd_source jfrogsaas
+  <buffer>
+          @type memory
+          flush_thread_count 10
+          flush_interval 3s
+          chunk_limit_size 5m
+          chunk_limit_records 500
+  </buffer>
 </match>
