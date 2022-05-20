@@ -97,9 +97,7 @@
   dd_source fluentd
   <buffer>
     @type memory
-    flush_thread_count 4
+    flush_thread_count 5
     flush_interval 5s
-    chunk_limit_size 1m
-    chunk_limit_records 500
   </buffer>
 </match>
