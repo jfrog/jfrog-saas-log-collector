@@ -92,7 +92,7 @@
 <match jfrog.saas.**>
   @type datadog
   @id datadog_agent_jfrog_artifactory
-  api_key ${ENV["DATADOG_API_KEY"]}
+  api_key #{ENV['DATADOG_API_KEY']}
   include_tag_key true
   dd_source fluentd
   <buffer>
