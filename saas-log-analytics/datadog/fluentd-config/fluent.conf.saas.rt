@@ -18,14 +18,6 @@
     time_format_fallbacks %Y-%m-%dT%H:%M:%SZ
   </parse>
 </source>
-<filter jfrog.saas.rt.artifactory.request>
-  @type record_transformer
-  enable_ruby true
-  <record>
-    repo ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2") ? (record["request_url"].split('/')[3]) : ("")}
-    image ${record["request_url"].include?("/api/docker") && !record["request_url"].include?("/api/docker/null") && !record["request_url"].include?("/api/docker/v2")  ? (record["request_url"].split('/')[5]) : ("")}
-  </record>
-</filter>
 
 <source>
   @type tail
@@ -73,9 +65,15 @@
 # DATADOG OUTPUT
 ####################
 <match jfrog.saas.**>
+  @type copy
+  <store>
   @type datadog
   @id datadog_agent_jfrog_artifactory
   api_key "#{ENV['DATADOG_API_KEY']}"
   include_tag_key true
   dd_source fluentd
+  </store>
+  <store>
+  @type stdout
+  </store>
 </match>
