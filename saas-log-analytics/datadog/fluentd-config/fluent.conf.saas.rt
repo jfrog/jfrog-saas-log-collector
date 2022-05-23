@@ -78,26 +78,13 @@
   </record>
 </filter>
 
-<filter jfrog.**>
-  @type record_transformer
-  <record>
-    hostname "#{Socket.gethostname}"
-    log_source ${tag}
-  </record>
-</filter>
-
 ####################
 # DATADOG OUTPUT
 ####################
-<match jfrog.**>
+<match jfrog.saas.**>
   @type datadog
   @id datadog_agent_jfrog_artifactory
   api_key "#{ENV['DATADOG_API_KEY']}"
   include_tag_key true
   dd_source fluentd
-  <buffer>
-    @type memory
-    flush_thread_count 5
-    flush_interval 5s
-  </buffer>
 </match>
