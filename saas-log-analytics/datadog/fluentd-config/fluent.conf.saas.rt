@@ -81,6 +81,7 @@
 <filter jfrog.saas.**>
   @type record_transformer
   <record>
+    instance "jfrog_cloud"
     hostname "#{Socket.gethostname}"
     log_source ${tag}
   </record>
@@ -92,7 +93,7 @@
 <match jfrog.saas.**>
   @type datadog
   @id datadog_agent_jfrog_artifactory
-  api_key #{ENV['DATADOG_API_KEY']}
+  api_key "#{ENV['DATADOG_API_KEY']}"
   include_tag_key true
   dd_source fluentd
   <buffer>
