@@ -73,7 +73,7 @@
     instance "jfrog_cloud"
     hostname "jfrog.io"
     log_source ${tag}
-    timestamp ${DateTime.parse(timestamp)}
+    timestamp ${DateTime.parse(record["timestamp"])}
   </record>
 </filter>
 
