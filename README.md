@@ -1,5 +1,12 @@
 # Jfrog::Saas::Log::Collector
 
+For setting up the JFrog SaaS Log Analytics access the respective integrations clicking the links below
+
+1. [Splunk](https://github.com/jfrog/jfrog-saas-log-collector/tree/main/saas-log-analytics/splunk)
+2. [Datadog]()
+
+Below steps are valid, only if log collection alone is needed without any analytics integration.
+
 JFrog Saas Log Collector gem is intended for downloading and extracting of log files generated in Artifactory or Xray on the Jfrog Cloud.
 The Log Collection feature on the cloud instance has to be [enabled](https://www.jfrog.com/confluence/display/JFROG/Artifactory+REST+API#ArtifactoryRESTAPI-EnableLogCollection) for this gem to perform the download and extract of the logs.
 
