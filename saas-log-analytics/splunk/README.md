@@ -20,7 +20,7 @@ Below mentioned are the steps to setup the respective segments
 1. Working and configured Splunk Enterprise Instance
    1. To setup an instance, refer [here](https://docs.splunk.com/Documentation/Splunk/8.2.6/Installation/Chooseyourplatform)
 
-2. Install the `JFrog Saas Log Analytics` app from Splunkbase [here!](https://splunkbase.splunk.com/app/5023/)
+2. Install the `JFrog Saas Log Analytics` app from Splunkbase [here!](https://splunkbase.splunk.com/app/6459/)
 
 ````text
 1. Download file from Splunkbase
