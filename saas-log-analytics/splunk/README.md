@@ -73,14 +73,14 @@ Docker has two sections that needs to be built and configured, one for log colle
 
 ### Log Collector Setup
 1. Download the log collector build 'Dockerfile' and environment file 'Dockerenvfile.txt' from [here](https://github.com/jfrog/jfrog-saas-log-collector/tree/main/saas-log-analytics/splunk/deployments/docker-log-collector)
-2. From the directory where the files are downloaded, run the following command 'docker build -t jfrog/saas-log-collector .'
+2. From the directory where the files are downloaded, run the following command ``` docker build -t jfrog/saas-log-collector . ``` *Note - ```.``` is part of the command
 3. Fill in all the keys with correct values in the 'Dockerenvfile.txt' which reads 'changeme'
 4. Run the following command to build the log collector image, execute ``` docker run -it --name jfrog-saas-log-collector -v /var/opt/jfrog/saas/logs:/jfrog/saas/logs --env-file Dockerenvfile.txt jfrog/saas-log-collector ```
 5. This should bring up the log collector container
 
 ### Log Forwarder Setup
 1. Download the log forwarder build 'Dockerfile' and environment file 'Dockerenvfile_splunk.txt' [here](https://github.com/jfrog/jfrog-saas-log-collector/tree/main/saas-log-analytics/splunk/deployments/docker-log-forwarder)
-2. From the directory where the files are downloaded, run the following command 'docker build -t jfrog/fluentd-splunk-saas .'
+2. From the directory where the files are downloaded, run the following command ``` docker build -t jfrog/fluentd-splunk-saas . ``` *Note - ```.``` is part of the command
 3. Fill in all the keys with correct values in the 'Dockerenvfile_splunk.txt' which reads 'changeme'
 4. Run the following command to build the log collector image, execute ``` docker run -it --name jfrog-fluentd-splunk-saas -v /Volumes/data/saas/logs:/jfrog/saas/logs --env-file Dockerenvfile_splunk.txt jfrog/fluentd-splunk-saas ```
 5. This should bring up the log forwarder container
