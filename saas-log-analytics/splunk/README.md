@@ -118,4 +118,12 @@ Docker has two sections that needs to be built and configured, one for log colle
 
 ```path_to_logs``` or ```target_log_path``` is the directory which should be accessible to collector and forwarder, the collector uses this to download and extract the log files, the forwarder uses this to parse the logs and hold the parse state information. Ensure write permissions to this directory against the userid where the collection and forwarding is being run.
 
+## Dashbaord Samples
 
+Log Analytics Dashboard
+
+![alt text](https://github.com/jfrog/jfrog-saas-log-collector/blob/main/saas-log-analytics/splunk/screensnaps/LogAnalytics.png?raw=true)
+
+Operations Analytics Dashboard
+
+![alt text](https://github.com/jfrog/jfrog-saas-log-collector/blob/main/saas-log-analytics/splunk/screensnaps/OpsAnalytics.png?raw=true)
