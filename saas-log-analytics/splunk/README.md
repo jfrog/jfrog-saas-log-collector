@@ -6,6 +6,13 @@ The JFrog Saas Log Analytics for Splunk consists of three segments,
 2. Log Collector - which collects the logs from the intended JFrog Cloud instance (NOT for self-hosted type)
 3. Log Forwarder - which forwards the converted log data to Splunk observability platform
 
+# Table of Contents
+1. [Splunk Application](#splunk-application)
+2. [Kubernetes](#kubernetes)
+3. [Docker](#docker)
+4. [Common Configuration Parameters ](#common-configuration-parameters)
+5. [Dashboard Samples](#dashboard-samples)
+
 Below mentioned are the steps to setup the respective segments
 
 ## Splunk Application
@@ -78,7 +85,8 @@ Docker has two sections that needs to be built and configured, one for log colle
 4. Run the following command to build the log collector image, execute 'docker run -it --name jfrog-fluentd-splunk-saas -v /Volumes/data/saas/logs:/jfrog/saas/logs --env-file Dockerenvfile_splunk.txt jfrog/fluentd-splunk-saas'
 5. This should bring up the log forwarder container
 
-# Common Configuration Parameters (Covers K8s and Docker deployment methods)
+# Common Configuration Parameters 
+### (Covers K8s and Docker deployment methods)
 
 ## For Splunk HEC Forwarding
 
@@ -118,7 +126,7 @@ Docker has two sections that needs to be built and configured, one for log colle
 
 ```path_to_logs``` or ```target_log_path``` is the directory which should be accessible to collector and forwarder, the collector uses this to download and extract the log files, the forwarder uses this to parse the logs and hold the parse state information. Ensure write permissions to this directory against the userid where the collection and forwarding is being run.
 
-## Dashbaord Samples
+# Dashboard Samples
 
 Log Analytics Dashboard
 
