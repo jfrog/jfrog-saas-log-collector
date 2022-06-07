@@ -145,6 +145,37 @@
       <chart>
         <title>Token Detail</title>
         <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=TKN entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | timechart count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisY.scale">log</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Operations on Users</title>
+      <chart>
+        <title>User Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=USR entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | timechart count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row id="ops2">
+    <panel>
+      <title>Operations on Tokens</title>
+      <chart>
+        <title>Token Detail</title>
+        <search>
           <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=TKN entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
           <earliest>$time_field.earliest$</earliest>
           <latest>$time_field.latest$</latest>
@@ -174,66 +205,6 @@
       <title>Operations on Users</title>
       <chart>
         <title>User Detail</title>
-        <search>
-          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event= "USR" entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
-          <earliest>$time_field.earliest$</earliest>
-          <latest>$time_field.latest$</latest>
-        </search>
-        <option name="charting.axisTitleX.text">Username</option>
-        <option name="charting.axisTitleX.visibility">visible</option>
-        <option name="charting.axisTitleY.text">Action on Users</option>
-        <option name="charting.axisTitleY.visibility">visible</option>
-        <option name="charting.axisTitleY2.visibility">visible</option>
-        <option name="charting.axisY.abbreviation">auto</option>
-        <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">0</option>
-        <option name="charting.chart">bar</option>
-        <option name="charting.chart.showDataLabels">all</option>
-        <option name="charting.chart.stackMode">stacked</option>
-        <option name="charting.drilldown">all</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="trellis.enabled">0</option>
-        <option name="trellis.scales.shared">1</option>
-        <option name="trellis.size">large</option>
-        <option name="trellis.splitBy">_aggregation</option>
-      </chart>
-    </panel>
-  </row>
-  <row id="ops2">
-    <panel>
-      <title>Operations on Permissions</title>
-      <chart>
-        <title>Permission Detail</title>
-        <search>
-          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=TKN entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
-          <earliest>$time_field.earliest$</earliest>
-          <latest>$time_field.latest$</latest>
-        </search>
-        <option name="charting.axisTitleX.text">Username</option>
-        <option name="charting.axisTitleX.visibility">visible</option>
-        <option name="charting.axisTitleY.text">Action on Tokens</option>
-        <option name="charting.axisTitleY.visibility">visible</option>
-        <option name="charting.axisTitleY2.visibility">visible</option>
-        <option name="charting.axisY.abbreviation">auto</option>
-        <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">0</option>
-        <option name="charting.chart">bar</option>
-        <option name="charting.chart.showDataLabels">all</option>
-        <option name="charting.chart.stackMode">stacked</option>
-        <option name="charting.drilldown">all</option>
-        <option name="charting.layout.splitSeries">0</option>
-        <option name="charting.legend.placement">right</option>
-        <option name="refresh.display">progressbar</option>
-        <option name="trellis.enabled">0</option>
-        <option name="trellis.scales.shared">1</option>
-        <option name="trellis.size">large</option>
-        <option name="trellis.splitBy">_aggregation</option>
-      </chart>
-    </panel>
-    <panel>
-      <title>Operations on Groups</title>
-      <chart>
-        <title>Group Detail</title>
         <search>
           <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event= "USR" entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
           <earliest>$time_field.earliest$</earliest>
@@ -261,37 +232,6 @@
   </row>
   <row id="ops3">
     <panel>
-      <title>Operations on Tokens</title>
-      <chart>
-        <title>Token Detail</title>
-        <search>
-          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=TKN entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | timechart count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete</query>
-          <earliest>$time_field.earliest$</earliest>
-          <latest>$time_field.latest$</latest>
-        </search>
-        <option name="charting.axisY.scale">log</option>
-        <option name="charting.chart">line</option>
-        <option name="charting.drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
-      </chart>
-    </panel>
-    <panel>
-      <title>Operations on Users</title>
-      <chart>
-        <title>User Detail</title>
-        <search>
-          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event=USR entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | timechart count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete</query>
-          <earliest>$time_field.earliest$</earliest>
-          <latest>$time_field.latest$</latest>
-        </search>
-        <option name="charting.chart">line</option>
-        <option name="charting.drilldown">none</option>
-        <option name="refresh.display">progressbar</option>
-      </chart>
-    </panel>
-  </row>
-  <row id="ops4">
-    <panel>
       <title>Operations on Groups</title>
       <chart>
         <title>Group Detail</title>
@@ -317,6 +257,66 @@
         <option name="charting.chart">bar</option>
         <option name="charting.drilldown">none</option>
         <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+  <row id="ops4">
+    <panel>
+      <title>Operations on Groups</title>
+      <chart>
+        <title>Group Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event="GRP" entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Username</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Action on Tokens</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">_aggregation</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Operations on Permission</title>
+      <chart>
+        <title>Permission Detail</title>
+        <search>
+          <query>`default_index` $ops_control$ sourcetype="jfrog.rt.access.audit" event="PERM" entity_name != "UNKNOWN" entity_name != "*jf*@*" entity_name != "*@jf*" entity_name != "*app@*" | stats count(eval(event_type = "C")) as create, count(eval(event_type = "U")) as update, count(eval(event_type = "D")) as delete by entity_name | sort entity_name</query>
+          <earliest>$time_field.earliest$</earliest>
+          <latest>$time_field.latest$</latest>
+        </search>
+        <option name="charting.axisTitleX.text">Username</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.text">Action on Users</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisY.abbreviation">auto</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.drilldown">all</option>
+        <option name="refresh.display">progressbar</option>
+        <option name="trellis.enabled">0</option>
+        <option name="trellis.scales.shared">1</option>
+        <option name="trellis.size">large</option>
+        <option name="trellis.splitBy">_aggregation</option>
       </chart>
     </panel>
   </row>

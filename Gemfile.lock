@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jfrog-saas-log-collector (0.1.1)
+    jfrog-saas-log-collector (0.1.5)
       addressable (~> 2.8.0)
       faraday (~> 2.2.0)
       faraday-follow_redirects (~> 0.2.0)
@@ -68,6 +68,8 @@ GEM
       fugit (~> 1.1, >= 1.1.6)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
+    tzinfo-data (1.2021.5)
+      tzinfo (>= 1.0.0)
     unicode-display_width (2.1.0)
     zlib (2.1.1)
 
@@ -88,6 +90,8 @@ DEPENDENCIES
   rake (~> 13.0)
   rubocop (~> 1.21)
   rufus-scheduler (~> 3.8.1)
+  tzinfo (~> 2.0.4)
+  tzinfo-data (~> 1.2021.5)
   zlib (~> 2.1.1)
 
 BUNDLED WITH
