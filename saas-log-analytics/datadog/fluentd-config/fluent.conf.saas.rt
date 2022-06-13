@@ -73,7 +73,7 @@
     instance "jfrog_cloud"
     hostname "jfrog.io"
     log_source ${tag}
-    timestamp ${DateTime.parse(record["timestamp"])}
+    timestamp ${Time.parse(record["timestamp"],"%Y-%m-%dT%H:%M:%S.%LZ").iso8601}
   </record>
 </filter>
 
@@ -81,14 +81,18 @@
 # DATADOG OUTPUT
 ####################
 <match jfrog.saas.**>
-  @type datadog
-  @id datadog_agent_jfrog_artifactory
-  api_key "#{ENV['DATADOG_API_KEY']}"
-  include_tag_key true
-  dd_source jfrogsaas
-  <buffer>
-    @type memory
-    flush_thread_count 5
-    flush_interval 5s
-  </buffer>
+  @type copy
+  <store>
+    @type datadog
+    @id datadog_agent_jfrog_saas
+    api_key "#{ENV['DATADOG_API_KEY']}"
+    include_tag_key true
+    dd_source jfrog_saas
+    timestamp_key timestamp
+    <buffer>
+      @type memory
+      flush_thread_count 5
+      flush_interval 5s
+    </buffer>
+  </store>
 </match>

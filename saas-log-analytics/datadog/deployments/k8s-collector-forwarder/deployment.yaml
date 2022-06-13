@@ -67,8 +67,7 @@ spec:
               echo "Installing fluent-plugin-datadog";
               gem install fluent-plugin-datadog --no-doc;
               curl https://raw.githubusercontent.com/jfrog/jfrog-saas-log-collector/main/saas-log-analytics/datadog/fluentd-config/fluent.conf.saas.rt -o /jfrog/saas/logs/fluentd.conf;
-              cat /jfrog/saas/logs/fluentd.conf;
-              fluentd -c /jfrog/saas/logs/fluentd.conf
+              fluentd -v -c /jfrog/saas/logs/fluentd.conf
           volumeMounts:
             - name: jfrog-saas-log-collector-log
               mountPath: "/jfrog/saas/logs"
