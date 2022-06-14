@@ -1,0 +1,673 @@
+{
+  "title": "JFrog Saas Operations Analytics",
+  "description": "JFrog Saas Operations Analytics",
+  "widgets": [
+    {
+      "id": 1,
+      "layout": {
+        "x": 59,
+        "y": 19,
+        "width": 49,
+        "height": 14
+      },
+      "definition": {
+        "title": "Operation on Users",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "search": {
+                  "query": "@log_source:jfrog.saas.rt.access.audit @event:USR -@entity_name:*@*"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "aggregation": "count"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@event_type",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "include_zero": false
+        },
+        "custom_links": []
+      }
+    },
+    {
+      "id": 2,
+      "layout": {
+        "x": 0,
+        "y": 19,
+        "width": 56,
+        "height": 14
+      },
+      "definition": {
+        "title": "Operations on Tokens",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "search": {
+                  "query": "@log_source:jfrog.saas.rt.access.audit @event:TKN -@entity_name:*@*"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "interval": 30000,
+                  "aggregation": "count"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@event_type",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "layout": {
+        "x": 59,
+        "y": 35,
+        "width": 49,
+        "height": 14
+      },
+      "definition": {
+        "title": "Operations on Users",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "search": {
+                  "query": "@log_source:jfrog.saas.rt.access.audit @event:USR -@entity_name:*@*"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "aggregation": "count"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@entity_name",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  },
+                  {
+                    "facet": "@event_type",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "layout": {
+        "x": 0,
+        "y": 35,
+        "width": 56,
+        "height": 14
+      },
+      "definition": {
+        "title": "Operations on Tokens By Users",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "search": {
+                  "query": "@log_source:jfrog.saas.rt.access.audit @event:TKN -@entity_name:*@*"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "aggregation": "count"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@entity_name",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  },
+                  {
+                    "facet": "@event_type",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "layout": {
+        "x": 1,
+        "y": 0,
+        "width": 120,
+        "height": 7
+      },
+      "definition": {
+        "type": "note",
+        "content": "JFrog Saas Operations Analytics",
+        "background_color": "blue",
+        "font_size": "36",
+        "text_align": "center",
+        "vertical_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom",
+        "has_padding": true
+      }
+    },
+    {
+      "id": 17,
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 26,
+        "height": 10
+      },
+      "definition": {
+        "type": "image",
+        "url": "https://media.jfrog.com/wp-content/uploads/2017/12/20133018/artifactory.png",
+        "sizing": "zoom"
+      }
+    },
+    {
+      "id": 3232420659105792,
+      "layout": {
+        "x": 27,
+        "y": 8,
+        "width": 95,
+        "height": 10
+      },
+      "definition": {
+        "type": "note",
+        "content": "This dashboard provides an overview of usage statistics of JFrog Artifactory Operations on the SaaS instance. Included are also some high-level views of audit data of operations on Tokens, Users, Groups and Permissions.  \n \nSource code is also available in [Github](https://github.com/jfrog/jfrog-saas-log-collector/tree/main/saas-log-analytics/datadog/dashboards)\n",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      }
+    },
+    {
+      "id": 5953567353947946,
+      "layout": {
+        "x": 0.07638888888888888,
+        "y": 85,
+        "width": 122,
+        "height": 18
+      },
+      "definition": {
+        "title": "Operations Detail Table",
+        "title_size": "16",
+        "title_align": "center",
+        "type": "log_stream",
+        "indexes": [],
+        "query": "source:jfrog_saas @log_source:jfrog.saas.rt.access.audit",
+        "sort": {
+          "column": "time",
+          "order": "desc"
+        },
+        "columns": [
+          "@event",
+          "@event_type",
+          "@entity_name"
+        ],
+        "show_date_column": true,
+        "show_message_column": true,
+        "message_display": "expanded-md"
+      }
+    },
+    {
+      "id": 7384738278009420,
+      "layout": {
+        "x": 110,
+        "y": 19,
+        "width": 12,
+        "height": 14
+      },
+      "definition": {
+        "type": "note",
+        "content": "Track the performed actions on Tokens and Users",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      }
+    },
+    {
+      "id": 8555429928372726,
+      "layout": {
+        "x": 110,
+        "y": 35,
+        "width": 12,
+        "height": 14
+      },
+      "definition": {
+        "type": "note",
+        "content": "Track the performed actions on Tokens and Users",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      }
+    },
+    {
+      "id": 5388017332146884,
+      "layout": {
+        "x": 110,
+        "y": 51,
+        "width": 12,
+        "height": 14
+      },
+      "definition": {
+        "type": "note",
+        "content": "Track the performed actions on Groups and Permissions",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      }
+    },
+    {
+      "id": 1363488207000694,
+      "layout": {
+        "x": 0,
+        "y": 51,
+        "width": 56,
+        "height": 15
+      },
+      "definition": {
+        "title": "Operations on Groups",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "search": {
+                  "query": "@log_source:jfrog.saas.rt.access.audit @event:GRP -@entity_name:*@*"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "interval": 30000,
+                  "aggregation": "count"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@event_type",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "id": 8560521985134420,
+      "layout": {
+        "x": 59,
+        "y": 51,
+        "width": 49,
+        "height": 15
+      },
+      "definition": {
+        "title": "Operation on Permissions",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "auto",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "search": {
+                  "query": "@log_source:jfrog.saas.rt.access.audit @event:PERM -@entity_name:*@*"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "interval": 30000,
+                  "aggregation": "count"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@event_type",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ]
+      }
+    },
+    {
+      "id": 7988747385437668,
+      "layout": {
+        "x": 0,
+        "y": 68,
+        "width": 56,
+        "height": 15
+      },
+      "definition": {
+        "title": "Operation on Group By Users",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "search": {
+                  "query": "@log_source:jfrog.saas.rt.access.audit @event:GRP -@entity_name:*@*"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "aggregation": "count"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@entity_name",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  },
+                  {
+                    "facet": "@event_type",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 4995578242778528,
+      "layout": {
+        "x": 59,
+        "y": 68,
+        "width": 49,
+        "height": 15
+      },
+      "definition": {
+        "title": "Operation on Permissions by Users",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "search": {
+                  "query": "@log_source:jfrog.saas.rt.access.audit @event:PERM -@entity_name:*@*"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "aggregation": "count"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@entity_name",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  },
+                  {
+                    "facet": "@event_type",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 1758865083332982,
+      "layout": {
+        "x": 110,
+        "y": 68,
+        "width": 12,
+        "height": 15
+      },
+      "definition": {
+        "type": "note",
+        "content": "Track the performed actions on Groups and Permissions",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "vertical_align": "center",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "left",
+        "has_padding": true
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "free",
+  "is_read_only": false,
+  "notify_list": [],
+  "id": "fbm-pjh-6dp"
+}

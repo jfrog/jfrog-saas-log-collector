@@ -1,0 +1,505 @@
+{
+  "title": "JFrog Saas Log Analytics",
+  "description": "JFrog Saas Log Analytics",
+  "widgets": [
+    {
+      "id": 1,
+      "layout": {
+        "x": 59,
+        "y": 19,
+        "width": 49,
+        "height": 14
+      },
+      "definition": {
+        "title": "Accessed Repos",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "queries": [
+              {
+                "search": {
+                  "query": "@repo:*?* @log_source:jfrog.saas.rt.artifactory.request @image:*?*"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "aggregation": "count"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@repo",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ],
+            "style": {
+              "palette": "dog_classic",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "include_zero": false
+        },
+        "custom_links": []
+      }
+    },
+    {
+      "id": 2,
+      "layout": {
+        "x": 0.08333333333333333,
+        "y": 19,
+        "width": 56,
+        "height": 14
+      },
+      "definition": {
+        "title": "Accessed Images",
+        "title_size": "16",
+        "title_align": "left",
+        "show_legend": true,
+        "legend_layout": "horizontal",
+        "legend_columns": [
+          "avg",
+          "min",
+          "max",
+          "value",
+          "sum"
+        ],
+        "type": "timeseries",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "timeseries",
+            "on_right_yaxis": false,
+            "queries": [
+              {
+                "search": {
+                  "query": "@repo:*?* @image:*?* @log_source:jfrog.saas.rt.artifactory.request"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "interval": 30000,
+                  "aggregation": "count"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@image",
+                    "sort": {
+                      "aggregation": "count",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ],
+            "style": {
+              "palette": "cool",
+              "line_type": "solid",
+              "line_width": "normal"
+            },
+            "display_type": "line"
+          }
+        ],
+        "yaxis": {
+          "include_zero": false
+        },
+        "custom_links": []
+      }
+    },
+    {
+      "id": 3,
+      "layout": {
+        "x": 59,
+        "y": 35,
+        "width": 49,
+        "height": 14
+      },
+      "definition": {
+        "title": "Upload Data Transfers by Repo",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "search": {
+                  "query": "-@repo:\"\" -@response_content_length:[-1 TO 0] -@remote_address:127.0.0.1 @log_source:jfrog.saas.rt.artifactory.request"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "metric": "@response_content_length",
+                  "aggregation": "cardinality"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@repo",
+                    "sort": {
+                      "metric": "@response_content_length",
+                      "aggregation": "cardinality",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "layout": {
+        "x": 0,
+        "y": 35,
+        "width": 56,
+        "height": 14
+      },
+      "definition": {
+        "title": "Download Data Transfers by Repo",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1",
+                "limit": {
+                  "count": 10,
+                  "order": "desc"
+                }
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "search": {
+                  "query": "-@repo:\"\" -@request_content_length:[-1 TO 0] -@remote_address:127.0.0.1 @log_source:jfrog.saas.rt.artifactory.request"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "metric": "@request_content_length",
+                  "aggregation": "cardinality"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@repo",
+                    "sort": {
+                      "metric": "@request_content_length",
+                      "aggregation": "cardinality",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "layout": {
+        "x": 0,
+        "y": 51,
+        "width": 56,
+        "height": 14
+      },
+      "definition": {
+        "title": "Download IP's by Data Volume",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "search": {
+                  "query": "-@request_content_length:[-1 TO 0] -@remote_address:127.0.0.1 @log_source:jfrog.saas.rt.artifactory.request"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "metric": "@request_content_length",
+                  "aggregation": "cardinality"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@remote_address",
+                    "sort": {
+                      "metric": "@request_content_length",
+                      "aggregation": "cardinality",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "custom_links": []
+      }
+    },
+    {
+      "id": 6,
+      "layout": {
+        "x": 59,
+        "y": 51,
+        "width": 49,
+        "height": 14
+      },
+      "definition": {
+        "title": "Upload IP's by Data Volume",
+        "title_size": "16",
+        "title_align": "left",
+        "type": "toplist",
+        "requests": [
+          {
+            "formulas": [
+              {
+                "formula": "query1"
+              }
+            ],
+            "response_format": "scalar",
+            "queries": [
+              {
+                "search": {
+                  "query": "-@response_content_length:[-1 TO 0] -@remote_address:127.0.0.1 @log_source:jfrog.saas.rt.artifactory.request"
+                },
+                "data_source": "logs",
+                "compute": {
+                  "metric": "@response_content_length",
+                  "aggregation": "cardinality"
+                },
+                "name": "query1",
+                "indexes": [
+                  "*"
+                ],
+                "group_by": [
+                  {
+                    "facet": "@remote_address",
+                    "sort": {
+                      "metric": "@response_content_length",
+                      "aggregation": "cardinality",
+                      "order": "desc"
+                    },
+                    "limit": 10
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "custom_links": []
+      }
+    },
+    {
+      "id": 13,
+      "layout": {
+        "x": 1,
+        "y": 0,
+        "width": 120,
+        "height": 7
+      },
+      "definition": {
+        "type": "note",
+        "content": "JFrog Saas Log Analytics",
+        "background_color": "blue",
+        "font_size": "36",
+        "text_align": "center",
+        "vertical_align": "center",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "bottom",
+        "has_padding": true
+      }
+    },
+    {
+      "id": 17,
+      "layout": {
+        "x": 0,
+        "y": 8,
+        "width": 26,
+        "height": 10
+      },
+      "definition": {
+        "type": "image",
+        "url": "https://media.jfrog.com/wp-content/uploads/2017/12/20133018/artifactory.png",
+        "sizing": "zoom"
+      }
+    },
+    {
+      "id": 3232420659105792,
+      "layout": {
+        "x": 27,
+        "y": 8,
+        "width": 95,
+        "height": 10
+      },
+      "definition": {
+        "type": "note",
+        "content": "This dashboard provides an overview of usage statistics of JFrog Artifactory logs from the SaaS instance. Included are also some high-level views of audit, request, and application logs.  \n \nSource code is also available in [Github](https://github.com/jfrog/jfrog-saas-log-collector/tree/main/saas-log-analytics/datadog/dashboards)\n",
+        "background_color": "white",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": false,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      }
+    },
+    {
+      "id": 5953567353947946,
+      "layout": {
+        "x": 0,
+        "y": 67,
+        "width": 122,
+        "height": 18
+      },
+      "definition": {
+        "title": "Raw Logs",
+        "title_size": "16",
+        "title_align": "center",
+        "type": "log_stream",
+        "indexes": [],
+        "query": "source:jfrog_saas @log_source:jfrog.saas.rt.artifactory.request",
+        "sort": {
+          "column": "time",
+          "order": "desc"
+        },
+        "columns": [
+          "host",
+          "service",
+          "@log_source"
+        ],
+        "show_date_column": true,
+        "show_message_column": true,
+        "message_display": "expanded-md"
+      }
+    },
+    {
+      "id": 7384738278009420,
+      "layout": {
+        "x": 110,
+        "y": 19,
+        "width": 12,
+        "height": 14
+      },
+      "definition": {
+        "type": "note",
+        "content": "Track the most accessed repositories and images in terms of requests.",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      }
+    },
+    {
+      "id": 8555429928372726,
+      "layout": {
+        "x": 110,
+        "y": 35,
+        "width": 12,
+        "height": 14
+      },
+      "definition": {
+        "type": "note",
+        "content": "Track the most used repositories in terms of uploads and downloads.\n",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      }
+    },
+    {
+      "id": 5388017332146884,
+      "layout": {
+        "x": 110,
+        "y": 51,
+        "width": 12,
+        "height": 14
+      },
+      "definition": {
+        "type": "note",
+        "content": "Track the heaviest users based on IP\n",
+        "background_color": "gray",
+        "font_size": "14",
+        "text_align": "left",
+        "show_tick": true,
+        "tick_pos": "50%",
+        "tick_edge": "left"
+      }
+    }
+  ],
+  "template_variables": [],
+  "layout_type": "free",
+  "is_read_only": false,
+  "notify_list": [],
+  "id": "5f6-dj2-m2t"
+}
