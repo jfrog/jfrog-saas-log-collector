@@ -66,6 +66,7 @@
   </record>
 </filter>
 
+## for debugging, use this line and comment the other line in the filter jfrog.saas.** segment's record section : timestamp ${Time.now.iso8601}
 <filter jfrog.saas.**>
   @type record_transformer
   enable_ruby true
@@ -73,11 +74,9 @@
     instance "jfrog_cloud"
     hostname "jfrog.io"
     log_source ${tag}
-    timestamp ${Time.now.iso8601}
+    timestamp ${Time.parse(record["timestamp"],"%Y-%m-%dT%H:%M:%S.%LZ").iso8601}
   </record>
 </filter>
-
-## post testing restore this line : timestamp ${Time.parse(record["timestamp"],"%Y-%m-%dT%H:%M:%S.%LZ").iso8601}
 
 ####################
 # DATADOG OUTPUT
