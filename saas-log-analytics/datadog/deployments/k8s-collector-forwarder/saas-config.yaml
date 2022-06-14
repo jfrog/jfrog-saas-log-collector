@@ -8,7 +8,7 @@ connection:
 log:
   log_ship_config: "access/api/v1/logshipping/config"
   solutions_enabled: ["artifactory", "xray"]
-  log_types_enabled: ["access-request", "access-security-audit", "artifactory-request", "xray-request"]
+  log_types_enabled: ["access-security-audit", "artifactory-request"]
   uri_date_pattern: "%Y-%m-%d"
   audit_repo: "artifactory/jfrog-logs-audit"
   log_repo: "artifactory/jfrog-logs"
@@ -19,7 +19,7 @@ log:
 process:
   parallel_process: 2
   parallel_downloads: 5
-  historical_log_days: 3
+  historical_log_days: 1
   write_logs_by_type: false
-  minutes_between_runs: 180
+  minutes_between_runs: 60
   
