@@ -60,7 +60,16 @@ For Operation Analysis
 3. Once the facets are defined, Import the Dashboard json files, for instructions click [here](https://docs.datadoghq.com/dashboards/#copy-import-or-export-dashboard-json)
    1. JFrog Saas Log Analysis Dashboard - click [here](https://raw.githubusercontent.com/jfrog/jfrog-saas-log-collector/main/saas-log-analytics/datadog/dashboards/JFrogSaasLogAnalytics.json)
    2. JFrog Saas Operations Analysis Dashboard - click [here](https://raw.githubusercontent.com/jfrog/jfrog-saas-log-collector/main/saas-log-analytics/datadog/dashboards/JFrogSaasOperationsAnalytics.json)
-   
+
+# Important Note !!!
+
+````text
+Datadog cannot ingest data which is beyond 18 Hours in the past for custom logs, so if any data is not searchable on datadog, 
+then the log entry date needs to be checked, it can also be one of the important reason for not seeing specific data.
+
+Reference https://docs.datadoghq.com/logs/log_collection/?tab=host#custom-log-forwarding
+````
+
 ## Kubernetes 
 ### (Includes instructions for setting up Collector and Forwarder)
 
