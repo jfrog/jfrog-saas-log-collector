@@ -35,26 +35,26 @@ Optional Step if a dedicated index is needed for data separation in Datadog, ski
 ````text
 Common Facets (i.e which is applicable for both the Saas Analytics Dashboards)
 
-  a. @log_source
-  b. @instance
-  c. @tag
+   a. @log_source
+   b. @instance
+   c. @tag
 
 For Log Analysis
 
-    a. @request_url
-    b. @repo
-    c. @image
-    d. @request_content_length
-    e. @response_content_length
-    f. @remote_address
-    g. @upload_size
+   a. @request_url
+   b. @repo
+   c. @image
+   d. @request_content_length
+   e. @response_content_length
+   f. @remote_address
+   g. @upload_size
     
 For Operation Analysis
 
-  a. @entity_name
-  b. @event_type
-  c. @event
-  d. @logged_principal
+   a. @entity_name
+   b. @event_type
+   c. @event
+   d. @logged_principal
 ````
 
 3. Once the facets are defined, Import the Dashboard json files, for instructions click [here](https://docs.datadoghq.com/dashboards/#copy-import-or-export-dashboard-json)
