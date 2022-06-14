@@ -3,7 +3,7 @@
 For setting up the JFrog SaaS Log Analytics access the respective integrations clicking the links below
 
 1. [Splunk](https://github.com/jfrog/jfrog-saas-log-collector/tree/main/saas-log-analytics/splunk)
-2. [Datadog]()
+2. [Datadog](https://github.com/jfrog/jfrog-saas-log-collector/blob/main/saas-log-analytics/datadog)
 
 Below steps are valid, only if log collection alone is needed without any analytics integration.
 
