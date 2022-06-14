@@ -33,7 +33,7 @@ Optional Step if a dedicated index is needed for data separation in Datadog, ski
 
 2. Add the Facets for Datadog, else the search may fail, below listed are the full set of facets needed
 ````text
-Common Facets (i.e which is applicable for both the Saas Analytics Dashboards
+Common Facets (i.e which is applicable for both the Saas Analytics Dashboards)
 
   a. @log_source
   b. @instance
