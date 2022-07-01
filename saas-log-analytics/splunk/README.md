@@ -110,7 +110,7 @@ Docker has two sections that needs to be built and configured, one for log colle
 6. (Optional) Enter a "Description" in the textbox
 7. Click on the green "Next" button
 8. Select App Context of "JFrog Platform Log Analytics" in the dropdown
-9. Add "jfrog_splunk" index to store the JFrog platform log data into.
+9. Add "jfrog_splunk_saas" index to store the JFrog platform log data into.
 10. Click on the green "Review" button
 11. If good, Click on the green "Done" button
 12. Save the generated token value
