@@ -135,3 +135,5 @@ Log Analytics Dashboard
 Operations Analytics Dashboard
 
 ![alt text](https://github.com/jfrog/jfrog-saas-log-collector/blob/main/saas-log-analytics/splunk/screensnaps/OpsAnalytics.png?raw=true)
+
+For any queries email to 'partner_support@jfrog.com'
